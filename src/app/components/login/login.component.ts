@@ -3,8 +3,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +22,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class LoginComponent {
   loginForm!: FormGroup;
-  constructor(private authService: AuthService){
+  constructor(private authService: AuthService, private router: Router, private cookieService: CookieService){
     this.loginForm = new FormGroup({
       usernameOrEmail: new FormControl('', Validators.required),
       password: new FormControl('', Validators.required)
@@ -39,7 +40,8 @@ export class LoginComponent {
         if(this.loginForm.get('usernameOrEmail')?.value == response[key]['username'] || this.loginForm.get('usernameOrEmail')?.value == response[key]['email']){
           if(this.loginForm.get('password')?.value == response[key]['password']){
             //logged in code
-            console.log("Logged in.");
+            // this.cookieService.set('user', ); //imposto un cookie
+            this.router.navigate(['/']);
           }
         }
       }

@@ -3,6 +3,7 @@ import {MatSidenavModule} from '@angular/material/sidenav';
 import { MatButton } from '@angular/material/button';
 import { RouterOutlet } from '@angular/router';
 import { RouterModule } from '@angular/router';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +12,8 @@ import { RouterModule } from '@angular/router';
     RouterOutlet,
     RouterModule,
     MatSidenavModule,
-    MatButton
+    MatButton,
+    MatIconModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

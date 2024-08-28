@@ -1,0 +1,15 @@
+.post {
+    margin-top: 50px;
+    max-width: 500px;
+}
+.post-img{
+    width: 500px;
+    height: 400px;
+}
+mat-icon{
+    margin-left: 20px;
+}
+mat-icon:hover{
+    color: #FFABF3;
+    transform: translate(2.05px);
+}
