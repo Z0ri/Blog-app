@@ -1,0 +1,15 @@
+.title{
+    text-align: center;
+}
+.content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin: 0;
+}
+.loginForm{
+    display: flex;
+    flex-direction: column;
+}

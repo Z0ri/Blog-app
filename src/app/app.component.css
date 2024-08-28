@@ -1,0 +1,28 @@
+.example-container {
+    width: auto;
+    height: 100%;
+}
+mat-drawer{
+    width: 300px;
+}
+mat-drawer-content{
+    background-color: rgb(53, 53, 53);
+}
+.drawer-title{
+    margin: 20px;
+}
+.logo{
+    width: 60px;
+    height: 60px;
+    margin: 10px;
+    float: left;
+    border-radius: 10px;
+}
+button{
+    margin: 5px;
+}
+.buttons{
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}

@@ -1,0 +1,21 @@
+.title{
+    text-align: center;
+}
+.content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin: 0;
+}
+.signupForm{
+    display: flex;
+    flex-direction: column;
+}
+.submitBtn{
+    border: .1px solid black;
+}
+.submitBtn:hover{
+    transform: translate(1.05);
+}

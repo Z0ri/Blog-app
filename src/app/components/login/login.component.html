@@ -1,0 +1,14 @@
+<div class="content">
+    <h1 class="title">Login</h1>
+    <form class="loginForm" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill">
+            <input matInput id="usernameOrEmail" formControlName="usernameOrEmail" placeholder="Username or email">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <input matInput id="password" type="password" formControlName="password" placeholder="Password">
+        </mat-form-field>
+        <button mat-button type="submit">Login</button>
+        <p>Don't have an account? No problem! <br><a routerLink="sign-up">Sign up right here</a></p>
+    </form>
+</div>
+  
