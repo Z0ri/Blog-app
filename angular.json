@@ -102,7 +102,7 @@
   },
   "cli": {
     "cache": {
-      "enabled": true
+      "enabled": false
     }
   }
 }

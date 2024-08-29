@@ -40,7 +40,8 @@ export class SignUpComponent {
   }
 
   onSubmit(): void {
-    this.authService.signUp(new User(this.signupForm.get('username')?.value, this.signupForm.get('email')?.value,this.signupForm.get('password')?.value)).subscribe();
+    this.authService.signUp(new User(this.signupForm.get('username')?.value, this.signupForm.get('email')?.value,this.signupForm.get('password')?.value))
+    .subscribe();
     this.router.navigate(['login'])
   }
 }

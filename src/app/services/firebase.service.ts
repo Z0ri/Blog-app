@@ -1,10 +1,11 @@
-// firebase.service.ts
 import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getDatabase, ref, set } from 'firebase/database';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { finalize } from 'rxjs';
 
-// Firebase configuration object
+
 const firebaseConfig = {
   apiKey: "AIzaSyDrH51HlOA_t9KHwYFRmRuCTpyj6zoWi1M",
   authDomain: "blog-app-85fe3.firebaseapp.com",
@@ -22,31 +23,32 @@ export class FirebaseService {
   private storage;
   private database;
 
-  constructor() {
-    // Initialize Firebase
+  constructor(private stg: AngularFireStorage) {
     const app = initializeApp(firebaseConfig);
     this.storage = getStorage(app);
     this.database = getDatabase(app);
   }
 
-  // Method to upload an image and return its download URL
-  uploadImage(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const storageReference = storageRef(this.storage, `images/${file.name}`);
-      uploadBytes(storageReference, file)
-        .then(snapshot => getDownloadURL(snapshot.ref))
-        .then(url => resolve(url))
-        .catch(error => reject(error));
-    });
-  }
+  uploadFile(file: File, filePath: string) {
+    const fileRef = this.stg.ref(filePath);
+    const task = this.stg.upload(filePath, file);
 
-  // Method to save image metadata to Realtime Database
-  saveImageMetadata(url: string, name: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const databaseReference = ref(this.database, `images/${name}`);
-      set(databaseReference, { url })
-        .then(() => resolve())
-        .catch(error => reject(error));
+    // Observe upload progress
+    task.percentageChanges().subscribe(progress => {
+      // You can use this progress value to update a progress bar in your component
+      console.log('Upload progress:', progress);
     });
+
+    // Get download URL when upload is complete
+    task.snapshotChanges().pipe(
+      finalize(() => {
+        fileRef.getDownloadURL().subscribe(url => {
+          // You can use this download URL to display the uploaded file in your component
+          console.log('File available at', url);
+        });
+      })
+    ).subscribe();
+
+    return task.percentageChanges(); // Return the observable for progress tracking
   }
 }

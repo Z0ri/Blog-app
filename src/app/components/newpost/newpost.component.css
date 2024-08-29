@@ -9,10 +9,11 @@
     height: 100%;
     margin: 0;
 }
-.loginForm{
+.newpostForm{
     display: flex;
     flex-direction: column;
 }
-.submitBtn{
+.createBtn{
     border: .1px solid black;
+    width: 100px;
 }

@@ -1,6 +1,4 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatCard, MatCardModule} from '@angular/material/card';
+import {Component, OnInit} from '@angular/core';
 import { PostComponent } from "../post/post.component";
 
 @Component({
@@ -12,6 +10,8 @@ import { PostComponent } from "../post/post.component";
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent {
-
+export class HomeComponent implements OnInit{
+  ngOnInit(): void {
+    
+  }
 }

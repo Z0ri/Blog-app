@@ -1,10 +1,15 @@
 <mat-drawer-container class="example-container" autosize>
     <mat-drawer mode="side" opened>     
-        <a routerLink="/"><img class="logo" src="https://media.istockphoto.com/id/1208174000/vector/people-talking-icon-in-flat-style-isolated-for-your-design-logo-vector-illustration.jpg?s=612x612&w=0&k=20&c=ZRezVbW1WfAYizGlAI4qPAp2AX6xNQxyubIWwyq4Ccc=" alt="logo"></a>
-        <h4 class="drawer-title">Blog</h4>
+        <div class="drawer-header">
+            <a routerLink="/"><img class="logo" src="https://media.istockphoto.com/id/1208174000/vector/people-talking-icon-in-flat-style-isolated-for-your-design-logo-vector-illustration.jpg?s=612x612&w=0&k=20&c=ZRezVbW1WfAYizGlAI4qPAp2AX6xNQxyubIWwyq4Ccc=" alt="logo"></a>
+            <h4 class="drawer-title">Blog</h4>
+        </div>
         <div class="buttons">
             <button mat-button routerLink="login"><mat-icon>login</mat-icon> Login</button>
             <button mat-button routerLink="sign-up"><mat-icon>person_add</mat-icon>Sign up</button>
+            <button mat-button routerLink="login"><mat-icon>Explore</mat-icon>Explore</button>
+            <button mat-button routerLink="profile"><mat-icon>account_circle</mat-icon>{{username}}</button>
+            <button mat-button routerLink="new-post" ><mat-icon>add_circle</mat-icon>create new post</button>
         </div>        
     </mat-drawer>
     <mat-drawer-content>
