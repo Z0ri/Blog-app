@@ -17,3 +17,10 @@
     border: .1px solid black;
     width: 100px;
 }
+.file-picker{
+    margin-bottom: 4vh;
+}
+.img-preview{
+    width: 300px;
+    height: 200px;
+}

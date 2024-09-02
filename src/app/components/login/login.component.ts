@@ -43,6 +43,7 @@ export class LoginComponent {
             this.cookieService.set('user', key); //set a cookie for the user id
             this.authService.setLogged(true); //set logged variable to 'true'
             this.router.navigate(['/']); //navigate to home
+            return;
           }
         }
       }

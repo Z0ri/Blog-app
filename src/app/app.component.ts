@@ -4,7 +4,7 @@ import {MatSidenavModule} from '@angular/material/sidenav';
 import { MatButton } from '@angular/material/button';
 import { RouterOutlet } from '@angular/router';
 import { RouterModule } from '@angular/router';
-import { MatIcon, MatIconModule } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import { AuthService } from './services/auth.service';
 import { CookieService } from 'ngx-cookie-service';
@@ -57,16 +57,18 @@ export class AppComponent implements OnInit{
   //   this.logged = this.authService.logged;
   //   console.log(this.logged);
   // }
-  getUsername() {
+  getUsername(): string {
     this.authService.getCurrentUser()
-      .subscribe((response: any) => {
-        if (response && response.username) {
-          this.username = response.username;
-          console.log(this.username);
-        } else {
-          console.error('Username not found in the response.');
-        }
-      });
+    .subscribe((response: any) => {
+      if (response && response.username) {
+        this.username = response.username;
+      } else {
+        console.log("getUsername(): ")
+        console.log(response);
+        console.error('Username not found in the response.');
+      }
+    });
+    return '';
   }
   
 }

@@ -1,14 +1,19 @@
 <div class="content">
     <h1 class="title">Create a new post!</h1>
     <form class="newpostForm" [formGroup]="newpostForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="fill">
-            <input matInput id="title" formControlName="title" placeholder="Title">
-        </mat-form-field>
-        <input id="img" src="" alt="post's image">
-        <mat-form-field appearance="fill">
-            <input matInput id="description" formControlName="description" placeholder="Description">
-        </mat-form-field>
-        <button mat-button type="submit" class="createBtn">Create</button>
+      <mat-form-field appearance="fill">
+        <input matInput id="title" formControlName="title" placeholder="Title">
+      </mat-form-field>
+      <div class="image-picker">
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+        <button mat-raised-button color="primary" (click)="fileInput.click()">
+          Select Image
+        </button>
+        <img *ngIf="selectedImage" [src]="selectedImage" alt="post's image preview" class="img-preview">
+      </div>
+      <mat-form-field appearance="fill">
+        <input matInput id="description" formControlName="description" placeholder="Description">
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" class="createBtn" color="accent">Create</button>
     </form>
 </div>
-  

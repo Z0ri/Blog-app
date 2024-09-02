@@ -13,7 +13,7 @@ export class ImgurService {
 
   formData: FormData = new FormData();
   
-  uploadImage(imageFile: File) {
+  uploadImage(imageFile: any) {
     console.log("called img");
     this.formData.append('image', imageFile);
     fetch('https://api.imgur.com/3/image/', {

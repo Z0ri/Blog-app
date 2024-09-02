@@ -9,6 +9,7 @@ import { CookieService } from 'ngx-cookie-service';
 export class AuthService {
   private http: HttpClient = inject(HttpClient);
   public logged: boolean = false;
+  public username: string = '';
   constructor(private cookieService: CookieService) { }
 
   signUp(newUser: User): Observable<Object>{
@@ -29,5 +30,12 @@ export class AuthService {
   }
   setLogged(bool: boolean): boolean{
     return this.logged;
+  }
+  getUsername(): string {
+    this.getCurrentUser()
+    .subscribe((response: any) => {
+        return response.username;
+    });
+    return 'sesewsea';
   }
 }
