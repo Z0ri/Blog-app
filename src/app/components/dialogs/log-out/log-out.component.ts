@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { CookieService } from 'ngx-cookie-service';
 @Component({
   selector: 'app-log-out',
   standalone: true,
@@ -21,7 +22,9 @@ import { MatInputModule } from '@angular/material/input';
   styleUrl: './log-out.component.css'
 })
 export class LogOutComponent {
+  constructor(private cookieService: CookieService){}
   logOut(){
-    //log out
+    this.cookieService.delete('user');
+    window.location.reload();
   }
 }

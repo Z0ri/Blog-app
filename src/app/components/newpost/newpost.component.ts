@@ -1,9 +1,8 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'; 
-import { ImgurService } from '../../services/imgur.service';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'; 
 import { CommonModule } from '@angular/common';
 import { PostComponent } from "../post/post.component";
 import { MatCard, MatCardModule } from '@angular/material/card';
@@ -15,6 +14,7 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -36,16 +36,17 @@ export class NewpostComponent implements OnInit{
   
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
 
-  constructor(private imgurService: ImgurService, private authService: AuthService) {
+  constructor(private authService: AuthService) {
     this.newpostForm = new FormGroup({
       description: new FormControl('', [Validators.required, Validators.maxLength(255)])
     });
   }
-  
+
   ngOnInit(): void {
     this.authService.getUsername().subscribe((response: any)=>this.accountName=response);
-  }
+    this.selectedImage = 'no-image.jpg';
 
+  }
 
   onSubmit(){
     if (this.selectedImage) {
@@ -67,8 +68,6 @@ export class NewpostComponent implements OnInit{
   }
 
   uploadFile(): void {
-    if (this.selectedImage) {
-      this.imgurService.uploadImage(this.selectedImage);
-    }
+
   }
 }

@@ -1,7 +1,7 @@
 <div class="container">
     <div class="left-section">
         <h1 class="title">Create a new post!</h1>
-        <form class="newpostForm" [formGroup]="newpostForm" (ngSubmit)="onSubmit()">
+        <form class="newpostForm" (ngSubmit)="onSubmit()">
           <div class="image-picker">
             <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
             <button mat-raised-button color="primary" (click)="fileInput.click()">
@@ -9,32 +9,32 @@
             </button>
           </div>
           <mat-form-field appearance="fill">
-            <input matInput id="description" formControlName="description" placeholder="Description" [(ngModel)]="description">
+            <input matInput name="description" class="description" placeholder="Description" [(ngModel)]="description">
           </mat-form-field>
           <button mat-raised-button color="primary" type="submit" class="createBtn" color="accent">Create</button>
         </form>
     </div>
   
-      <!-- Linea verticale -->
-      <div class="vertical-line"></div>
-  
-      <div class="right-section">
-        <mat-card class="post" appearance="outlined">
-            <mat-card-header>
-              <div mat-card-avatar class="account-img"></div>
-              <mat-card-title>{{accountName}}</mat-card-title>
-              <mat-card-subtitle>yy-mm-dd</mat-card-subtitle>
-            </mat-card-header>
-            <img mat-card-image src="{{selectedImage}}" class="post-img" alt="Post's image">
-            <mat-card-content>
-              <p class="card-description">
-                {{description}}
-              </p>
-            </mat-card-content>
-            <mat-card-actions>
-              <mat-icon>thumb_up</mat-icon>
-              <mat-icon>thumb_down</mat-icon>
-            </mat-card-actions>
-        </mat-card>   
-      </div>
+    <!-- Linea verticale -->
+    <div class="vertical-line"></div>
+
+    <div class="right-section">
+    <mat-card class="post" appearance="outlined">
+        <mat-card-header>
+            <div mat-card-avatar class="account-img"></div>
+            <mat-card-title>{{accountName}}</mat-card-title>
+            <mat-card-subtitle>yy-mm-dd</mat-card-subtitle>
+        </mat-card-header>
+        <img mat-card-image src="{{selectedImage}}" class="post-img" alt="Post's image">
+        <mat-card-content>
+            <p class="card-description">
+            {{description}}
+            </p>
+        </mat-card-content>
+        <mat-card-actions>
+            <mat-icon>thumb_up</mat-icon>
+            <mat-icon>thumb_down</mat-icon>
+        </mat-card-actions>
+    </mat-card>   
+    </div>
 </div>

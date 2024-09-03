@@ -5,9 +5,9 @@
             <h4 class="drawer-title">Blog</h4>
         </div>
         <div class="buttons">
-            <button mat-button routerLink="login"><mat-icon>login</mat-icon> Login</button>
-            <button mat-button routerLink="sign-up"><mat-icon>person_add</mat-icon>Sign up</button>
-            <button mat-button routerLink="login"><mat-icon>Explore</mat-icon>Explore</button>
+            <button mat-button routerLink="login" *ngIf="!logged"><mat-icon>login</mat-icon> Login</button>
+            <button mat-button routerLink="sign-up" *ngIf="!logged"><mat-icon>person_add</mat-icon>Sign up</button>
+            <button mat-button routerLink="explore"><mat-icon>Explore</mat-icon>Explore</button>
             <button mat-button routerLink="profile"><mat-icon>account_circle</mat-icon>{{username}}</button>
             <button mat-button routerLink="new-post" ><mat-icon>add_circle</mat-icon>create new post</button>
         

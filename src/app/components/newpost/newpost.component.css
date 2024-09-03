@@ -24,6 +24,8 @@
 
 mat-card img{
     width: 400px;
+    height: 250px;
+    object-fit: cover;
 }
 .newpostForm{
     display: flex;
