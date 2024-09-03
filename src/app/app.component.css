@@ -38,5 +38,10 @@ button{
 .buttons{
     display: flex;
     flex-direction: column;
-    width: 300px;
+    width: 290px;
+}
+.settingsBtn-container{
+    display: flex;
+    align-items: flex-end;
+    height: 38vh;
 }

@@ -35,40 +35,15 @@ export class AppComponent implements OnInit{
     private router: Router,
     private authService: AuthService
   ){
-    this.logged = authService.logged;
   }
   ngOnInit(): void {
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(()=>{
-      this.onRouteChange();
-    });
-    this.getUsername();
-  }
-  onRouteChange() {
-    if(this.cookieService.get("user")){
-      this.authService.logged = true;
-    }else{
-      this.authService.logged = false;
-    }
+    //set username variable to current user's username
+    this.authService.getUsername().subscribe((response: any)=>this.username=response);
   }
   // signOut(){
   //   this.authService.signOut();
   //   this.logged = this.authService.logged;
   //   console.log(this.logged);
   // }
-  getUsername(): string {
-    this.authService.getCurrentUser()
-    .subscribe((response: any) => {
-      if (response && response.username) {
-        this.username = response.username;
-      } else {
-        console.log("getUsername(): ")
-        console.log(response);
-        console.error('Username not found in the response.');
-      }
-    });
-    return '';
-  }
   
 }

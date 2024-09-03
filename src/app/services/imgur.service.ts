@@ -1,6 +1,7 @@
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { throwError, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,17 +12,20 @@ export class ImgurService {
 
   constructor(private http: HttpClient) {}
 
-  formData: FormData = new FormData();
-  
-  uploadImage(imageFile: any) {
-    console.log("called img");
-    this.formData.append('image', imageFile);
-    fetch('https://api.imgur.com/3/image/', {
-      method: 'post',
-      headers: {
-        Authorization: `Client-ID ${this.CLIENT_ID}`
-      },
-      body: this.formData
-    }).then(data=>data.json()).then(data=>console.log(data));
+  uploadImage(imageFile: any): Observable<any> {
+    const formData = new FormData();  // Creare FormData qui per ogni richiesta
+    formData.append('image', imageFile);
+
+    const headers = new HttpHeaders({
+      Authorization: `Client-ID ${this.CLIENT_ID}`
+    });
+
+    return this.http.post(this.IMGUR_UPLOAD_URL, formData, { headers })
+      .pipe(
+        catchError(error => {
+          console.error('Error uploading image to Imgur:', error);
+          return throwError(error);
+        })
+      );
   }
 }

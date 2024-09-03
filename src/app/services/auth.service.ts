@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { User } from '../models/user';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 import { CookieService } from 'ngx-cookie-service';
 @Injectable({
   providedIn: 'root'
@@ -22,8 +22,17 @@ export class AuthService {
   getUsers(): Observable<object>{
     return this.http.get<{[key:string]:User}>("https://blog-app-85fe3-default-rtdb.firebaseio.com/users.json");
   }
-  getCurrentUser(): Observable<object>{
-    return this.http.get(`https://blog-app-85fe3-default-rtdb.firebaseio.com/users/${this.cookieService.get('user')}.json`);
+  getCurrentUser() {
+    if (this.cookieService.get('user')) {
+      return this.http.get(`https://blog-app-85fe3-default-rtdb.firebaseio.com/users/${this.cookieService.get('user')}.json`)
+        .pipe(
+          catchError((error) => {
+            console.error('Error fetching user data:', error);
+            return of(null); // Return an observable with null
+          })
+        );
+    }
+    return of(null); // Return an observable with null if no user cookie
   }
   getLogged(): boolean{
     return this.logged;
@@ -31,11 +40,7 @@ export class AuthService {
   setLogged(bool: boolean): boolean{
     return this.logged;
   }
-  getUsername(): string {
-    this.getCurrentUser()
-    .subscribe((response: any) => {
-        return response.username;
-    });
-    return 'sesewsea';
+  getUsername(): Observable<object> {
+    return this.http.get(`https://blog-app-85fe3-default-rtdb.firebaseio.com/users/${this.cookieService.get('user')}/username.json`);
   }
 }
