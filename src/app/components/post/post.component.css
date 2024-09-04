@@ -6,10 +6,17 @@
     width: 400px;
     height: 300px;
 }
+.account-img {
+    background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
+    background-size: cover;
+}
 mat-icon{
     margin-left: 20px;
 }
 mat-icon:hover{
     color: #FFABF3;
     transform: translate(2.05px);
+}
+.likes, .dislikes{
+    margin-left: 5px;
 }

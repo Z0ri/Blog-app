@@ -23,4 +23,12 @@ export class PostComponent {
   accountName: string = 'account name';
   description: string = 'post description';
   imageSrc: string = '';
+  title: string = '';
+
+  like(){
+
+  }
+  dislike(){
+    
+  }
 }

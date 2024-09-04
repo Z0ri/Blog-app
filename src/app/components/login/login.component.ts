@@ -41,7 +41,6 @@ export class LoginComponent {
           if(this.loginForm.get('password')?.value == response[key]['password']){
             //logged in code
             this.cookieService.set('user', key); //set a cookie for the user id
-            this.authService.setLogged(true); //set logged variable to 'true'
             this.router.navigate(['/']); //navigate to home
             return;
           }

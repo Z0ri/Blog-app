@@ -3,7 +3,10 @@
     height: 100vh;
     align-items: center;
 }
-
+.account-img {
+    background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
+    background-size: cover;
+}
 .left-section, .right-section {
     display:  flex;
     flex-direction: column;
@@ -35,4 +38,24 @@ mat-card img{
     max-width: 370px;
     word-wrap: break-word;
     overflow-wrap: break-word;
+}
+.title{
+    max-width: 300px;
+    font-size: 22px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+.username{
+    font-size: 18px;
+}
+
+mat-icon{
+    margin-left: 20px;
+}
+mat-icon:hover{
+    color: #FFABF3;
+    transform: translate(2.05px);
+}
+.likes, .dislikes{
+    margin-left: 5px;
 }
