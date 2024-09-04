@@ -8,12 +8,18 @@ import { PostComponent } from "../post/post.component";
 import { MatCard, MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
-import { CookieService } from 'ngx-cookie-service';
 import { FireStorageService } from '../../services/fire-storage.service';
 import { HttpClient } from '@angular/common/http';
-import { Post } from '../../models/post';
 import { Router } from '@angular/router';
 import { PostsService } from '../../services/posts.service';
+import {
+  MatSnackBar,
+  MatSnackBarAction,
+  MatSnackBarActions,
+  MatSnackBarLabel,
+  MatSnackBarRef,
+} from '@angular/material/snack-bar';
+import { PostSavingComponent } from '../snackbar/post-saving/post-saving.component';
 
 @Component({
   selector: 'app-newpost',
@@ -35,6 +41,7 @@ import { PostsService } from '../../services/posts.service';
   styleUrl: './newpost.component.css'
 })
 export class NewpostComponent implements OnInit{
+  private _snackBar = inject(MatSnackBar);
   http: HttpClient = inject(HttpClient)
   selectedImage: string | ArrayBuffer | null = null;
   file: File | null = null;
@@ -94,9 +101,15 @@ export class NewpostComponent implements OnInit{
         .catch(error => {
           console.error('Error uploading file:', error);
         });
+      this.openSnackbar();
       this.router.navigate(['/']);
     }
   }
 
-
+  openSnackbar(){
+    let seconds = 3;
+    this._snackBar.openFromComponent(PostSavingComponent, {
+      duration: seconds * 1000,
+    });
+  }
 }

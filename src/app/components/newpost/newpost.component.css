@@ -39,9 +39,9 @@ mat-card img{
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
-.title{
-    max-width: 300px;
+.card-title{
     font-size: 22px;
+    max-width: 300px;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
