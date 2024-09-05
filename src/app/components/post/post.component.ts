@@ -25,12 +25,14 @@ export class PostComponent{
   accountImg: string = 'account_circle.png';
   accountName: string = '';
   today: Date = new Date();
-  loadingDate: string = `${this.today.getDay()}/${this.today.getMonth()}/${this.today.getFullYear()}`;
+  loadingDate: string = `${this.today.getDate()}/${this.today.getMonth() + 1}/${this.today.getFullYear()}`;
   
   constructor(private authService: AuthService){}
 
+  
   //on like click
   like(){
+
   }
   //on dislike click
   dislike(){

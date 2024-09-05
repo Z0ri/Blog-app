@@ -50,10 +50,13 @@ export class PostsService {
     return componentRefs;
   }
   //save post data in DB
-  async saveInDB(url: string, title: string, description: string){
+  async savePostInDB(url: string, title: string, description: string){
     let author: string = await firstValueFrom(this.authService.getUsername());
+    let today = new Date();
+    let date: string = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+    
 
-    let newPost = new Post('', author, title, url, description);
+    let newPost = new Post('', author, date, title, url, description);
     this.http.post<{name: string}>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/posts.json`, JSON.parse(JSON.stringify(newPost)))
     .subscribe({
       next: response => {

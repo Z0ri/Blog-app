@@ -97,7 +97,7 @@ export class NewpostComponent implements OnInit{
       this.firestorageService.uploadFile(filePath, this.file)
         .then(url => {
           console.log('File uploaded successfully! Download URL:', url);
-          this.postsService.saveInDB(url, this.title, this.description);
+          this.postsService.savePostInDB(url, this.title, this.description);
         })
         .catch(error => {
           console.error('Error uploading file:', error);
