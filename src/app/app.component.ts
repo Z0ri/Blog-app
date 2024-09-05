@@ -9,7 +9,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import { AuthService } from './services/auth.service';
 import { CookieService } from 'ngx-cookie-service';
 import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -36,9 +36,9 @@ export class AppComponent implements OnInit{
     private authService: AuthService
   ){
   }
-  ngOnInit(): void {
+  async ngOnInit(){
     //set username variable to current user's username
-    this.authService.getUsername().subscribe((response: any)=>this.username=response);
+    this.username = await firstValueFrom(this.authService.getUsername());
     if(this.cookieService.get('user')){
       this.logged = true;
     }else{

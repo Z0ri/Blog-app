@@ -10,6 +10,21 @@
     background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
     background-size: cover;
 }
+.card-description{
+    max-width: 370px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+.card-title{
+    font-size: 22px;
+    max-width: 300px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+.username{
+    font-size: 18px;
+}
+
 mat-icon{
     margin-left: 20px;
 }

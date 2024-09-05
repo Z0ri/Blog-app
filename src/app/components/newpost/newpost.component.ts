@@ -20,6 +20,7 @@ import {
   MatSnackBarRef,
 } from '@angular/material/snack-bar';
 import { PostSavingComponent } from '../snackbar/post-saving/post-saving.component';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-newpost',
@@ -66,8 +67,8 @@ export class NewpostComponent implements OnInit{
     });
   }
 
-  ngOnInit(): void {
-    this.authService.getUsername().subscribe((response: any)=>this.accountName = response);
+  async ngOnInit() {
+    this.accountName = await firstValueFrom(this.authService.getUsername());
     this.selectedImage = 'no-image.jpg';
   }
 
