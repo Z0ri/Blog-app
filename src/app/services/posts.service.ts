@@ -11,6 +11,7 @@ import { firstValueFrom } from 'rxjs';
   providedIn: 'root'
 })
 export class PostsService {
+  postAuthor: string = "";
   allPosts: any[] = [];
   postId: string = '';
   http: HttpClient = inject(HttpClient);
@@ -44,6 +45,7 @@ export class PostsService {
       componentRef.instance.title = post.title;
       componentRef.instance.description = post.description;
       componentRef.instance.url = post.url;
+      componentRef.instance.author = post.author;
       componentRefs.push(componentRef);
     }
 
@@ -51,12 +53,12 @@ export class PostsService {
   }
   //save post data in DB
   async savePostInDB(url: string, title: string, description: string){
-    let author: string = await firstValueFrom(this.authService.getUsername());
+    this.postAuthor = await firstValueFrom(this.authService.getUsername());
     let today = new Date();
     let date: string = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
     
 
-    let newPost = new Post('', author, date, title, url, description);
+    let newPost = new Post('', this.postAuthor, date, title, url, description);
     this.http.post<{name: string}>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/posts.json`, JSON.parse(JSON.stringify(newPost)))
     .subscribe({
       next: response => {

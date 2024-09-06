@@ -3,8 +3,10 @@
     max-width: 500px;
 }
 .post-img{
-    width: 400px;
+    width: 498px;
     height: 300px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 .account-img {
     background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
@@ -16,7 +18,7 @@
     overflow-wrap: break-word;
 }
 .card-title{
-    font-size: 22px;
+    font-size: 30px;
     max-width: 300px;
     word-wrap: break-word;
     overflow-wrap: break-word;

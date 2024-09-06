@@ -23,7 +23,7 @@ export class PostComponent{
   @Input() url: string = '';
   @Input() description: string = 'post description';
   accountImg: string = 'account_circle.png';
-  accountName: string = '';
+  author: string = '';
   today: Date = new Date();
   loadingDate: string = `${this.today.getDate()}/${this.today.getMonth() + 1}/${this.today.getFullYear()}`;
   
@@ -32,10 +32,14 @@ export class PostComponent{
   
   //on like click
   like(){
-
+    //when route changes or when page is refreshed send a request to the server to update likes
   }
   //on dislike click
   dislike(){
-    
+    //when route changes or when page is refreshed send a request to the server to update dislike
+  }
+  //on comment click
+  comment(){
+    //add comment function
   }
 }

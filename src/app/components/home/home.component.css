@@ -1,5 +1,4 @@
 .posts{
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    /* non so perché il css non va */
 }
