@@ -1,6 +1,8 @@
 <div class="profile-header">
-    <img src="{{accountName}}" alt="profile pic" class="pro-pic">
-    <h2 class="account-name">Account name</h2>
+    <input type="file" (change)="onSelectedProfilePic($event)" #fileInput accept="image/*" style="display: none;">
+    <img src="{{proPic}}" alt="profile pic" class="pro-pic">
+    <mat-icon class="edit-icon" (click)="edit()">edit</mat-icon>
+    <h2 class="account-name">{{accountName}}</h2>
 </div>
 
 <div class="info">
@@ -17,6 +19,11 @@
         <h4>0</h4>
     </div>
 </div>
+<div class="actions">
+    <button mat-raised-button class="follow-button">Follow</button>
+</div>
+
+
 
 <div class="posts">
     <app-post></app-post>

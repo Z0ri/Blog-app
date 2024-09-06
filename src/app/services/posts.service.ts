@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { CookieService } from 'ngx-cookie-service';
 import { Console, count } from 'console';
 import { PostComponent } from '../components/post/post.component';
-import { firstValueFrom } from 'rxjs';
+import { first, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -37,7 +37,7 @@ export class PostsService {
     return this.allPosts;
   }
   //create a post element for each post fetched from the DB
-  createAllPostElements(container: ViewContainerRef){
+  async createAllPostElements(container: ViewContainerRef){
     const componentRefs: ComponentRef<PostComponent>[] = []; //create array of post references
 
     for (let post of this.allPosts) {
@@ -56,9 +56,9 @@ export class PostsService {
     this.postAuthor = await firstValueFrom(this.authService.getUsername());
     let today = new Date();
     let date: string = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
-    
+    let profilePic = await firstValueFrom(this.authService.getProfilePic());
 
-    let newPost = new Post('', this.postAuthor, date, title, url, description);
+    let newPost = new Post('', this.postAuthor, date, title, url, description, profilePic);
     this.http.post<{name: string}>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/posts.json`, JSON.parse(JSON.stringify(newPost)))
     .subscribe({
       next: response => {

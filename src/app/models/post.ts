@@ -6,6 +6,7 @@ export class Post{
         public title: string = '',
         public url: string = '',
         public description: string = '',
+        public profilePic: string = '',
         public like: number = 0,
         public dislike: number = 0
     ) {}

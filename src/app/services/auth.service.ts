@@ -33,9 +33,16 @@ export class AuthService {
     return of(null); // Return an observable with null if no user cookie
   }
   getUsername(): Observable<string> {
-    return this.http.get<string>(`https://blog-app-85fe3-default-rtdb.firebaseio.com/users/${this.cookieService.get('user')}/username.json`);
+    return this.http.get<string>(`${this.getDatabaseURL()}/users/${this.cookieService.get('user')}/username.json`);
   }
   getDatabaseURL(){
     return `https://blog-app-85fe3-default-rtdb.firebaseio.com`;
+  }
+  updateProfilePic(url: string): Observable<any>{
+    //update profile pic
+    return this.http.patch(`${this.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, {profilePic : url})
+  }
+  getProfilePic(): Observable<string>{
+    return this.http.get<string>(`${this.getDatabaseURL()}/users/${this.cookieService.get('user')}/profilePic.json`);
   }
 }

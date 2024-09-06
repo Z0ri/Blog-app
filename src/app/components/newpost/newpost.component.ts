@@ -74,7 +74,7 @@ export class NewpostComponent implements OnInit{
 
   onSubmit(){
     if (this.selectedImage) {
-      this.uploadFile();
+      this.uploadFile(); //create actual post in the DB
     }
   }
 
@@ -97,6 +97,7 @@ export class NewpostComponent implements OnInit{
       this.firestorageService.uploadFile(filePath, this.file)
         .then(url => {
           console.log('File uploaded successfully! Download URL:', url);
+          //save uploaded image's url into realtime DB
           this.postsService.savePostInDB(url, this.title, this.description);
         })
         .catch(error => {
