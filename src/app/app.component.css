@@ -3,7 +3,7 @@
     height: 100%;
 }
 mat-drawer{
-    width: 300px;
+    width: 250px;
 }
 mat-drawer-content{
     background-color: rgb(53, 53, 53);
@@ -38,7 +38,7 @@ button{
 .buttons{
     display: flex;
     flex-direction: column;
-    width: 290px;
+    width: 240px;
 }
 .settingsBtn-container{
     display: flex;
