@@ -31,8 +31,8 @@ export class PostComponent implements OnInit{
   constructor(private authService: AuthService){}
 
 
-  async ngOnInit() {
-    this.accountImg = await(firstValueFrom(this.authService.getUsername()));
+  ngOnInit() {
+    
   }
 
 

@@ -56,7 +56,10 @@ export class PostsService {
     this.postAuthor = await firstValueFrom(this.authService.getUsername());
     let today = new Date();
     let date: string = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
-    let profilePic = await firstValueFrom(this.authService.getProfilePic());
+    let profilePic = "";
+    if(await firstValueFrom(this.authService.getProfilePic())){
+      profilePic = await firstValueFrom(this.authService.getProfilePic());
+    }
 
     let newPost = new Post('', this.postAuthor, date, title, url, description, profilePic);
     this.http.post<{name: string}>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/posts.json`, JSON.parse(JSON.stringify(newPost)))
