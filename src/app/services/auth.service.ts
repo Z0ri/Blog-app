@@ -6,7 +6,7 @@ import { CookieService } from 'ngx-cookie-service';
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService{
   private http: HttpClient = inject(HttpClient);
   public username: string = '';
   constructor(private cookieService: CookieService) { }
@@ -47,5 +47,12 @@ export class AuthService {
   }
   getProfilePic(): Observable<string>{
     return this.http.get<string>(`${this.getDatabaseURL()}/users/${this.cookieService.get('user')}/profilePic.json`);
+  }
+  checkLogged(): boolean{
+    if(this.cookieService.get('user')){
+      return true;
+    }else{
+      return false;
+    }
   }
 }

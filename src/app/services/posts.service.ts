@@ -84,4 +84,22 @@ export class PostsService {
     { id: this.postId })
     .subscribe();
   }
+
+  //on like click
+  like(likes: number){
+    //when route changes or when page is refreshed send a request to the server to update likes
+    //add a 'hasLiked' section to post, to check whether someone has already liked a certain post, not allowing him to like it again
+    //add style change when clicked
+  }
+  //on dislike click
+  dislike(dislikes: number){
+    //when route changes or when page is refreshed send a request to the server to update dislike
+    //add a 'hasDisliked' section to post, to check whether someone has already disliked a certain post, not allowing him to dislike it again
+    //add style change when clicked
+  }
+  //on comment click
+  comment(){
+    //add comment function
+    //add style change when clicked
+  }
 }
