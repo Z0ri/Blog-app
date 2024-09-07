@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { CookieService } from 'ngx-cookie-service';
 import { Console, count } from 'console';
 import { PostComponent } from '../components/post/post.component';
-import { first, firstValueFrom } from 'rxjs';
+import { first, firstValueFrom, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -36,16 +36,23 @@ export class PostsService {
     });
     return this.allPosts;
   }
+  
+  // get profile pic of the author of the post
+  getPostProfilePic(authorId: string): Observable<any> {
+    return this.authService.getUser(authorId);
+  }
+
   //create a post element for each post fetched from the DB
   async createAllPostElements(container: ViewContainerRef){
     const componentRefs: ComponentRef<PostComponent>[] = []; //create array of post references
-
     for (let post of this.allPosts) {
       const componentRef = container.createComponent(PostComponent);
       componentRef.instance.title = post.title;
       componentRef.instance.description = post.description;
       componentRef.instance.url = post.url;
       componentRef.instance.author = post.author;
+      componentRef.instance.authorId = post.authorId;
+      componentRef.instance.postId = post.id;
       componentRefs.push(componentRef);
     }
 
@@ -56,12 +63,9 @@ export class PostsService {
     this.postAuthor = await firstValueFrom(this.authService.getUsername());
     let today = new Date();
     let date: string = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
-    let profilePic = "";
-    if(await firstValueFrom(this.authService.getProfilePic())){
-      profilePic = await firstValueFrom(this.authService.getProfilePic());
-    }
 
-    let newPost = new Post('', this.postAuthor, date, title, url, description, profilePic);
+    //insert new post in DB
+    let newPost = new Post('', this.postAuthor,this.cookieService.get('user'), date, title, url, description);
     this.http.post<{name: string}>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/posts.json`, JSON.parse(JSON.stringify(newPost)))
     .subscribe({
       next: response => {

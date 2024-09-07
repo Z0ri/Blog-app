@@ -32,6 +32,9 @@ export class AuthService {
     }
     return of(null); // Return an observable with null if no user cookie
   }
+  getUser(userId: string) {
+    return this.http.get(`https://blog-app-85fe3-default-rtdb.firebaseio.com/users/${userId}.json`);
+  }
   getUsername(): Observable<string> {
     return this.http.get<string>(`${this.getDatabaseURL()}/users/${this.cookieService.get('user')}/username.json`);
   }

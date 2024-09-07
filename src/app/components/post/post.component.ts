@@ -1,14 +1,17 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, Input, OnInit} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCard, MatCardModule} from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { PostsService } from '../../services/posts.service';
 
 @Component({
   selector: 'app-post',
   standalone: true,
   imports: [
+    CommonModule,
     MatButtonModule,
     MatCardModule,
     MatIconModule,
@@ -23,18 +26,29 @@ export class PostComponent implements OnInit{
   @Input() title: string = 'post title';
   @Input() url: string = '';
   @Input() description: string = 'post description';
-  accountImg: string = 'account_circle.png';
+  accountImg: string = '';
   author: string = '';
+  authorId: string = '';
+  postId: string = '';
   today: Date = new Date();
   loadingDate: string = `${this.today.getDate()}/${this.today.getMonth() + 1}/${this.today.getFullYear()}`;
   
-  constructor(private authService: AuthService){}
+  constructor(
+    private authService: AuthService,
+    private postsService: PostsService,
+    private elementRef: ElementRef
+  ){}
 
 
   ngOnInit() {
-    
+    const element: HTMLElement = this.elementRef.nativeElement.querySelector('.account-img');
+    // Fetch and set the account image 
+    this.postsService.getPostProfilePic(this.authorId).subscribe((response: any) => {
+      this.accountImg = response.profilePic;
+      element.style.backgroundImage = `url(${this.accountImg})`;
+    });
   }
-
+  
 
   //on like click
   like(){
