@@ -97,7 +97,7 @@ export class PostsService {
   }
   //save likes and dislikes in the server
   saveLikeDislikes(){
-    console.log("post data saved.");
+    
   }
   //on comment click
   comment(){
