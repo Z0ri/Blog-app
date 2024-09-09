@@ -85,53 +85,60 @@ export class PostsService {
     .subscribe();
   }
 
+  saveLikeDislike(authorId: string, postId: string, likes: number, dislike: number){
+    if(likes){
+      this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, {like: likes}).subscribe();
+    }
+    if(dislike){
+      this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, {dislike: dislike}).subscribe();
+    }
+  }
   //save likes in DB
-  saveLikes(authorId: string, postId: string, like: boolean): Observable<Object> {
-    if (like) {
+  // saveLikes(authorId: string, postId: string, like: boolean): Observable<Object> {
+  //   if (like) {
+  //     return this.getLikes(authorId, postId).pipe(
+  //       switchMap((response) => {
+  //         let likes = Number(response) + 1; // Increment the like count
+  //         return this.http.patch(
+  //           `${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, 
+  //           { like: likes }
+  //         );
+  //       })
+  //     );
+  //   } else {
+  //     return this.getLikes(authorId, postId).pipe(
+  //       switchMap((response)=>{
+  //         let likes = Number(response) - 1;
+  //         return this.http.patch(
+  //           `${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, 
+  //           { like: likes }
+  //         );
+  //       })
+  //     )
+  //   }
+  // }
+  
+  saveDislikes(authorId: string, postId: string, dislike: boolean): Observable<Object> {
+    if (dislike) {
       return this.getLikes(authorId, postId).pipe(
         switchMap((response) => {
-          let likes = Number(response) + 1; // Increment the like count
+          let dislikes = Number(response) + 1; // Increment the like count
           return this.http.patch(
             `${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, 
-            { like: likes }
+            { dislike: dislikes }
           );
         })
       );
     } else {
-      // Return an observable that emits an empty result or a default value if `like` is false
-      return of({}); // Or you can return `of(null)` or `of(undefined)`
-    }
-  }
-  
-  // async saveLikes(authorId: string, postId: string, like: boolean): Promise<void> {
-  //   console.log("saveLikes(): " + postId);
-  //   if(like){
-  //     try {
-  //       let likes = await firstValueFrom(this.getLikes(authorId, postId));
-  //       console.log("likes "+likes);
-  //       if (likes) {
-  //         likes += 1;
-  //         await firstValueFrom(this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { likes: likes }));
-  //         console.log("like saved.");
-  //       }
-  //     } catch (error) {
-  //       console.error('Error saving likes:', error);
-  //     }
-  //   }else{
-  //     console.log("ERROR: unsufficient like amount.");
-  //   }
-  // }
-  
-  async saveDislikes(authorId: string, postId: string, liked: boolean): Promise<void> {
-    if(liked){
-      try {
-        const dislikes = await firstValueFrom(this.getDislikes(authorId, postId));
-        if (dislikes) {
-          await firstValueFrom(this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { dislikes }));
-        }
-      } catch (error) {
-        console.error('Error saving dislikes:', error);
-      }
+      return this.getLikes(authorId, postId).pipe(
+        switchMap((response) => {
+          let dislikes = Number(response) - 1; // Increment the like count
+          return this.http.patch(
+            `${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, 
+            { dislike: dislikes }
+          );
+        })
+      );
     }
   }
   
