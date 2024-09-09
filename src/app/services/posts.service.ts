@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { CookieService } from 'ngx-cookie-service';
 import { Console, count } from 'console';
 import { PostComponent } from '../components/post/post.component';
-import { first, firstValueFrom, Observable } from 'rxjs';
+import { first, firstValueFrom, Observable, of, switchMap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -85,19 +85,61 @@ export class PostsService {
     .subscribe();
   }
 
-  //on like click
-  like(likes: number){
-    //when route changes or when page is refreshed send a request to the server to update likes
-    //add style change when clicked
+  //save likes in DB
+  saveLikes(authorId: string, postId: string, like: boolean): Observable<Object> {
+    if (like) {
+      return this.getLikes(authorId, postId).pipe(
+        switchMap((response) => {
+          let likes = Number(response) + 1; // Increment the like count
+          return this.http.patch(
+            `${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, 
+            { like: likes }
+          );
+        })
+      );
+    } else {
+      // Return an observable that emits an empty result or a default value if `like` is false
+      return of({}); // Or you can return `of(null)` or `of(undefined)`
+    }
   }
-  //on dislike click
-  dislike(dislikes: number){
-    //when route changes or when page is refreshed send a request to the server to update dislike
-    //add style change when clicked
+  
+  // async saveLikes(authorId: string, postId: string, like: boolean): Promise<void> {
+  //   console.log("saveLikes(): " + postId);
+  //   if(like){
+  //     try {
+  //       let likes = await firstValueFrom(this.getLikes(authorId, postId));
+  //       console.log("likes "+likes);
+  //       if (likes) {
+  //         likes += 1;
+  //         await firstValueFrom(this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { likes: likes }));
+  //         console.log("like saved.");
+  //       }
+  //     } catch (error) {
+  //       console.error('Error saving likes:', error);
+  //     }
+  //   }else{
+  //     console.log("ERROR: unsufficient like amount.");
+  //   }
+  // }
+  
+  async saveDislikes(authorId: string, postId: string, liked: boolean): Promise<void> {
+    if(liked){
+      try {
+        const dislikes = await firstValueFrom(this.getDislikes(authorId, postId));
+        if (dislikes) {
+          await firstValueFrom(this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { dislikes }));
+        }
+      } catch (error) {
+        console.error('Error saving dislikes:', error);
+      }
+    }
   }
-  //save likes and dislikes in the server
-  saveLikeDislikes(){
-    
+  
+  getLikes(authorId: string, postId: string){
+    return this.http.get(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}/like.json`);
+  }
+  getDislikes(authorId: string, postId: string): Observable<string>{
+    return this.http.get<string>(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}/dislike.json`);
   }
   //on comment click
   comment(){

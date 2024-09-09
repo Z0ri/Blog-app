@@ -42,6 +42,7 @@ export class PostComponent implements OnInit{
   liked: boolean = false;
   disliked: boolean = false;
 
+  //variables used to display errors
   canLike: boolean = true;
   canDislike: boolean = true;
   canComment: boolean = true;
@@ -65,59 +66,73 @@ export class PostComponent implements OnInit{
       this.accountImg = response.profilePic;
       element.style.backgroundImage = `url(${this.accountImg})`;
     });
+
+
+
+    
     this.logged = this.authService.checkLogged();
-    if (this.logged) {
-      // Generate the unique cookie key using the user and post ID
-      const likeCookieKey = `like-${this.cookieService.get('user')}-${this.postId}`;
-      
-      // Check the cookie for like status
-      const likeStatus = this.cookieService.get(likeCookieKey);
-      this.liked = likeStatus === 'true'; // Set liked status based on cookie
-      //add a like if 'like' cookie is set to true
-      if(this.cookieService.get(`like-${this.cookieService.get('user')}-${this.postId}`) == 'true'){
-        this.likes += 1;
+    if (this.logged) {  
+      //update DB
+      if(this.cookieService.get(`like-${this.authorId}-${this.postId}`) === 'true'){ //check if the post was liked
+        this.postsService.saveLikes(this.authorId, this.postId, true)
+        .subscribe((response)=>{
+          console.log(response);
+        })
+        // this.postsService.saveLikes(this.authorId, this.postId, true)
+        // .then(()=>{
+        //   console.log("like saved.");
+        // })
+        // .catch(error=>console.log(error));
       }
-      //add a dislike if 'dislike' cookie is set to true
-      if(this.cookieService.get(`dislike-${this.cookieService.get('user')}-${this.postId}`) == 'true'){
-        this.dislikes += 1;
-      }
+
+      // //update UI
+      // //add a like if 'like' cookie is set to true
+      // if(this.cookieService.get(`like-${this.cookieService.get('user')}-${this.postId}`) == 'true'){
+      //   this.likes += 1;
+      // }
+      // //add a dislike if 'dislike' cookie is set to true
+      // if(this.cookieService.get(`dislike-${this.cookieService.get('user')}-${this.postId}`) == 'true'){
+      //   this.dislikes += 1;
+      // }
+      this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false');
+      this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false');
     }
   }
   
 
   handleReaction(action: 'like' | 'dislike') {
+    // check if logged
     if (this.logged) {
       // Generate unique cookie keys based on action
-      const cookieKey = `${action}-${this.cookieService.get('user')}-${this.postId}`;
-      
+      const cookieKey = `${action}-${this.authorId}-${this.postId}`;
       // Determine the current state and perform the action
       if (action === 'like') {
         if (!this.liked) {
-          this.likes += 1;// Add like
-          this.liked = true;
+          // add like
+          this.likes += 1;//increase like counter in UI
+          this.liked = true;//set the state of the like button to true
           this.disliked = false; // Ensure dislike is removed if the post is liked
           this.dislikes = Math.max(0, this.dislikes - 1); // Ensure dislikes don't go negative
-          this.cookieService.set(cookieKey, 'true', 365); // Set like cookie
-          this.cookieService.set(`dislike-${this.cookieService.get('user')}-${this.postId}`, 'false', 365); // Remove dislike cookie
+          this.cookieService.set(cookieKey, 'true', 365); // Set like cookie to true
+          this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false', 365); // set dislike cookie to false
         } else {
           // Remove like
-          this.likes -= 1;
-          this.liked = false;
+          this.likes -= 1; //decrease like counter in UI
+          this.liked = false; //set state of the dislike button to false
           this.cookieService.set(cookieKey, 'false', 365); // Update like cookie
         }
       } else if (action === 'dislike') {
         if (!this.disliked) {
-          // Add dislike
-          this.dislikes += 1;
-          this.disliked = true;
+          this.dislikes += 1; //increase dislike counter in UI
+          this.disliked = true; //set the state of the like button to true
           this.liked = false; // Ensure like is removed if the post is disliked
-          this.likes = Math.max(0, this.likes - 1); // Ensure likes don't go negative
-          this.cookieService.set(cookieKey, 'true', 365); // Set dislike cookie
-          this.cookieService.set(`like-${this.cookieService.get('user')}-${this.postId}`, 'false', 365); // Remove like cookie
+          this.dislikes = Math.max(0, this.dislikes - 1); // Ensure dislikes don't go negative
+          this.cookieService.set(cookieKey, 'true', 365); // Set dislike cookie to true
+          this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false', 365); // set like cookie to false
         } else {
           // Remove dislike
-          this.dislikes -= 1;
-          this.disliked = false;
+          this.dislikes -= 1; //decrease dislike counter in UI
+          this.disliked = false; //set state of the dislike button to false
           this.cookieService.set(cookieKey, 'false', 365); // Update dislike cookie
         }
       }

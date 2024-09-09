@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit, OnDestroy{
   constructor(private postsService: PostsService){}
 
   ngOnDestroy(): void {
-    this.postsService.saveLikeDislikes();
+    
   }
 
   ngOnInit(): void {
