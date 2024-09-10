@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,6 +7,8 @@ import { CommonModule } from '@angular/common';
 import { PostsService } from '../../services/posts.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CookieService } from 'ngx-cookie-service';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-post',
@@ -51,7 +53,8 @@ export class PostComponent implements OnInit {
     private postsService: PostsService,
     private elementRef: ElementRef,
     private changeDetector: ChangeDetectorRef,
-    private cookieService: CookieService
+    private cookieService: CookieService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -66,36 +69,52 @@ export class PostComponent implements OnInit {
 
     this.logged = this.authService.checkLogged(); //check if logged
     
-      // Handle likes
-      this.postsService.getLikes(this.authorId, this.postId)
-      .subscribe((response: any) => {
-        this.likes = Number(response);
+    //Save like/dislikes when route changes
+    this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe(() => {
+      this.saveLikes();
+      this.saveDislikes();
+    });
+
+
+    // Handle likes
+    this.saveLikes();
+
+    // Handle dislikes
+    this.saveDislikes();
+
+  }
+
+  saveLikes(){
+    this.postsService.getLikes(this.authorId, this.postId)
+    .subscribe((response: any) => {
+      this.likes = Number(response);
+      this.changeDetector.detectChanges();
+      if (this.cookieService.get(`like-${this.authorId}-${this.postId}`) === 'true') {
+        this.likes+=1;
         this.changeDetector.detectChanges();
-        if (this.cookieService.get(`like-${this.authorId}-${this.postId}`) === 'true') {
-          this.likes+=1;
+        this.postsService.saveLikeDislike(this.authorId, this.postId, this.likes, this.dislikes);
+        this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false');
+      }else{
+        this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false');
+      }
+    });
+  }
+  saveDislikes(){
+    this.postsService.getDislikes(this.authorId, this.postId)
+      .subscribe((response: any) => {
+        this.dislikes = Number(response);
+        this.changeDetector.detectChanges();
+        if (this.cookieService.get(`dislike-${this.authorId}-${this.postId}`) === 'true') {
+          this.dislikes+=1;
           this.changeDetector.detectChanges();
           this.postsService.saveLikeDislike(this.authorId, this.postId, this.likes, this.dislikes);
-          this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false');
+          this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false');
         }else{
-          this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false');
+          this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false');
         }
       });
-
-      // Handle dislikes
-      this.postsService.getDislikes(this.authorId, this.postId)
-        .subscribe((response: any) => {
-          this.dislikes = Number(response);
-          this.changeDetector.detectChanges();
-          if (this.cookieService.get(`dislike-${this.authorId}-${this.postId}`) === 'true') {
-            this.dislikes+=1;
-            this.changeDetector.detectChanges();
-            this.postsService.saveLikeDislike(this.authorId, this.postId, this.likes, this.dislikes);
-            this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false');
-          }else{
-            this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false');
-          }
-        });
-
   }
 
   handleReaction(action: 'like' | 'dislike') {
