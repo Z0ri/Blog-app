@@ -86,37 +86,13 @@ export class PostsService {
   }
 
   saveLikeDislike(authorId: string, postId: string, likes: number, dislike: number){
-    if(likes){
+    if(likes && likes >=0){
       this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, {like: likes}).subscribe();
     }
-    if(dislike){
+    if(dislike && dislike >=0){
       this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, {dislike: dislike}).subscribe();
     }
   }
-  //save likes in DB
-  // saveLikes(authorId: string, postId: string, like: boolean): Observable<Object> {
-  //   if (like) {
-  //     return this.getLikes(authorId, postId).pipe(
-  //       switchMap((response) => {
-  //         let likes = Number(response) + 1; // Increment the like count
-  //         return this.http.patch(
-  //           `${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, 
-  //           { like: likes }
-  //         );
-  //       })
-  //     );
-  //   } else {
-  //     return this.getLikes(authorId, postId).pipe(
-  //       switchMap((response)=>{
-  //         let likes = Number(response) - 1;
-  //         return this.http.patch(
-  //           `${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, 
-  //           { like: likes }
-  //         );
-  //       })
-  //     )
-  //   }
-  // }
   
   saveDislikes(authorId: string, postId: string, dislike: boolean): Observable<Object> {
     if (dislike) {

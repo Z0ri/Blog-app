@@ -33,13 +33,14 @@ export class PostComponent implements OnInit {
   today: Date = new Date();
   loadingDate: string = `${this.today.getDate()}/${this.today.getMonth() + 1}/${this.today.getFullYear()}`;
   
-  likes: number = 0;
-  dislikes: number = 0;
-  liked: boolean = false;
-  disliked: boolean = false;
+  likes: number = 0; //likes counter
+  dislikes: number = 0; //dislikes counter
+
+  liked: boolean = false; //keep track of the like button status
+  disliked: boolean = false; //keep track of the dislike button status
   
-  // Variables to display errors
-  canLike: boolean = true;
+  // Variables to display errors if not logged
+  canLike: boolean = true; 
   canDislike: boolean = true;
   canComment: boolean = true;
   
@@ -63,32 +64,38 @@ export class PostComponent implements OnInit {
       this.changeDetector.detectChanges(); // Ensure view updates
     });
 
-    this.logged = this.authService.checkLogged();
+    this.logged = this.authService.checkLogged(); //check if logged
     
-    if (this.logged) {  
       // Handle likes
-      if (this.cookieService.get(`like-${this.authorId}-${this.postId}`) === 'true') {
-        this.postsService.getLikes(this.authorId, this.postId)
-          .subscribe((response: any) => {
-            this.likes = Number(response) + 1;
-            this.postsService.saveLikeDislike(this.authorId, this.postId, this.likes, this.dislikes);
-            this.likes = 0;
-          });
-      }
+      this.postsService.getLikes(this.authorId, this.postId)
+      .subscribe((response: any) => {
+        this.likes = Number(response);
+        this.changeDetector.detectChanges();
+        if (this.cookieService.get(`like-${this.authorId}-${this.postId}`) === 'true') {
+          this.likes+=1;
+          this.changeDetector.detectChanges();
+          this.postsService.saveLikeDislike(this.authorId, this.postId, this.likes, this.dislikes);
+          this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false');
+        }else{
+          this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false');
+        }
+      });
 
       // Handle dislikes
-      if (this.cookieService.get(`dislike-${this.authorId}-${this.postId}`) === 'true') {
-        this.postsService.getDislikes(this.authorId, this.postId)
-          .subscribe((response: any) => {
-            this.dislikes = Number(response) + 1;
+      this.postsService.getDislikes(this.authorId, this.postId)
+        .subscribe((response: any) => {
+          this.dislikes = Number(response);
+          this.changeDetector.detectChanges();
+          if (this.cookieService.get(`dislike-${this.authorId}-${this.postId}`) === 'true') {
+            this.dislikes+=1;
+            this.changeDetector.detectChanges();
             this.postsService.saveLikeDislike(this.authorId, this.postId, this.likes, this.dislikes);
-            this.dislikes = 0;
-          });
-      }
+            this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false');
+          }else{
+            this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false');
+          }
+        });
 
-      this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false');
-      this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false');
-    }
   }
 
   handleReaction(action: 'like' | 'dislike') {
@@ -99,8 +106,10 @@ export class PostComponent implements OnInit {
         if (!this.liked) {
           this.likes += 1;
           this.liked = true;
-          this.disliked = false;
-          this.dislikes = Math.max(0, this.dislikes - 1);
+          if(this.disliked == true){
+            this.dislikes = Math.max(0, this.dislikes - 1);
+            this.disliked = false;
+          }
           this.cookieService.set(cookieKey, 'true', 365);
           this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false', 365);
         } else {
@@ -112,8 +121,10 @@ export class PostComponent implements OnInit {
         if (!this.disliked) {
           this.dislikes += 1;
           this.disliked = true;
-          this.liked = false;
-          this.likes = Math.max(0, this.likes - 1);
+          if(this.liked == true){
+            this.likes = Math.max(0, this.likes - 1);
+            this.liked = false;
+          }
           this.cookieService.set(cookieKey, 'true', 365);
           this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false', 365);
         } else {
