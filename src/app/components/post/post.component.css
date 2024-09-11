@@ -13,6 +13,7 @@
     background-position: center;
     width: 50px;
     height: 50px;
+    cursor: pointer;
 }
 .account-img:hover{
     transform: translate(2.05px);
@@ -32,15 +33,17 @@
     font-size: 18px;
 }
 
-mat-icon{
+.like-btn, .dislike-btn, .comment-btn{
     margin-left: 20px;
+    cursor: pointer;
 }
-mat-icon:hover{
+.like-btn:hover, .dislike-btn:hover, .comment-btn:hover{
     color: #FFABF3;
     transform: translate(2.05px);
 }
 .likes, .dislikes, .comments{
     margin-left: 5px;
+    cursor: pointer;
 }
 mat-error{
     margin-top: 50px;

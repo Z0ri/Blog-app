@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { CookieService } from 'ngx-cookie-service';
 import { Console, count } from 'console';
 import { PostComponent } from '../components/post/post.component';
-import { first, firstValueFrom, Observable, of, switchMap } from 'rxjs';
+import { first, firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -85,38 +85,78 @@ export class PostsService {
     .subscribe();
   }
 
-  saveLikeDislike(authorId: string, postId: string, likes: number, dislike: number){
-    if(likes && likes >=0){
-      this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, {like: likes}).subscribe();
-    }
-    if(dislike && dislike >=0){
-      this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, {dislike: dislike}).subscribe();
-    }
+  addLikedPost(postId: string) {
+    this.getLikedPosts()
+      .pipe(
+        map(response => {
+          // Ensure response is an array, default to an empty array if not
+          return Array.isArray(response) ? response : [];
+        }),
+        switchMap((currentLikes: string[]) => {
+          let updatedLikes = currentLikes;
+  
+          // Append new postId to the existing list if it's not already present
+          if (!currentLikes.includes(postId)) {
+            updatedLikes = [...currentLikes, postId];
+          }
+  
+          // Ensure the payload is properly formatted
+          const payload = { likedPosts: updatedLikes };
+  
+          // Send updated list back to the server
+          return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
+        })
+      )
+      .subscribe({
+        next: response => {
+          console.log('Post added successfully:', response);
+        },
+        error: error => {
+          console.error('Error adding post:', error);
+        }
+      });
   }
   
-  saveDislikes(authorId: string, postId: string, dislike: boolean): Observable<Object> {
-    if (dislike) {
-      return this.getLikes(authorId, postId).pipe(
-        switchMap((response) => {
-          let dislikes = Number(response) + 1; // Increment the like count
-          return this.http.patch(
-            `${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, 
-            { dislike: dislikes }
-          );
-        })
-      );
-    } else {
-      return this.getLikes(authorId, postId).pipe(
-        switchMap((response) => {
-          let dislikes = Number(response) - 1; // Increment the like count
-          return this.http.patch(
-            `${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, 
-            { dislike: dislikes }
-          );
-        })
-      );
+  
+  getLikedPosts(){
+    return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/likedPosts.json`);
+  }
+
+  async checkLikedPost(postId: string): Promise<boolean> {
+    try {
+      const likedPosts = await firstValueFrom(this.getLikedPosts());
+  
+      // Ensure likedPosts is an array
+      if (Array.isArray(likedPosts)) {
+        return likedPosts.includes(postId);
+      } else {
+        console.warn('Liked posts is not an array:', likedPosts);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error checking liked post:', error);
+      return false;
     }
   }
+
+  // Function to save likes
+  saveLikes(authorId: string, postId: string, likes: number) {
+    if (likes && likes >= 0) {
+      return this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { like: likes });
+    }else{
+      return of({});
+    }
+  }
+
+  // Function to save dislikes
+  saveDislikes(authorId: string, postId: string, dislikes: number) {
+    if (dislikes && dislikes >= 0) {
+      return this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { dislike: dislikes });
+    }else{
+      return of({})
+    }
+  }
+
   
   getLikes(authorId: string, postId: string){
     return this.http.get(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}/like.json`);
@@ -124,6 +164,8 @@ export class PostsService {
   getDislikes(authorId: string, postId: string): Observable<string>{
     return this.http.get<string>(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}/dislike.json`);
   }
+
+
   //on comment click
   comment(){
     //add comment function

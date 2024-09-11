@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, ChangeDetectorRef, OnDestroy, AfterViewInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,10 +24,14 @@ import { filter } from 'rxjs';
   templateUrl: './post.component.html',
   styleUrls: ['./post.component.css']  // Corrected from styleUrl to styleUrls
 })
-export class PostComponent implements OnInit {
+export class PostComponent implements OnInit, AfterViewInit {
   @Input() title: string = 'post title';
   @Input() url: string = '';
   @Input() description: string = 'post description';
+
+  likeButton!: HTMLElement;
+  accountImg_element!: HTMLElement
+
   accountImg: string = 'account_circle.png';
   author: string = '';
   authorId: string = '';
@@ -45,7 +49,8 @@ export class PostComponent implements OnInit {
   canLike: boolean = true; 
   canDislike: boolean = true;
   canComment: boolean = true;
-  
+  isAuthor: boolean = false;
+
   logged: boolean = false;
 
   constructor(
@@ -57,19 +62,30 @@ export class PostComponent implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit() {
-    const element: HTMLElement = this.elementRef.nativeElement.querySelector('.account-img');
-    
+  ngAfterViewInit(): void {
+    this.likeButton = this.elementRef.nativeElement.querySelector('.like-btn');
+  }
+
+  async ngOnInit() {
+    this.logged = this.authService.checkLogged(); //check if logged
+    this.accountImg_element = this.elementRef.nativeElement.querySelector('.account-img'); //get account img element
     // Fetch and set the account image 
     this.postsService.getPostProfilePic(this.authorId).subscribe((response: any) => {
       this.accountImg = response.profilePic;
-      element.style.backgroundImage = `url(${this.accountImg})`;
+      this.accountImg_element.style.backgroundImage = `url(${this.accountImg})`;
       this.changeDetector.detectChanges(); // Ensure view updates
     });
+    //Save previous likes/dislikes when page refreshes
+    this.saveLikes();// Save likes 
+    this.saveDislikes();// Save dislikes
 
-    this.logged = this.authService.checkLogged(); //check if logged
+    //get dislikes
+    this.postsService.getDislikes(this.authorId, this.postId).subscribe((response: any)=>{
+      this.dislikes = Number(response);
+      this.changeDetector.detectChanges();
+    });
     
-    //Save like/dislikes when route changes
+    //Save likes/dislikes when route changes
     this.router.events
     .pipe(filter(event => event instanceof NavigationEnd))
     .subscribe(() => {
@@ -77,82 +93,83 @@ export class PostComponent implements OnInit {
       this.saveDislikes();
     });
 
-
-    // Handle likes
-    this.saveLikes();
-
-    // Handle dislikes
-    this.saveDislikes();
-
-  }
-
-  saveLikes(){
-    this.postsService.getLikes(this.authorId, this.postId)
-    .subscribe((response: any) => {
-      this.likes = Number(response);
-      this.changeDetector.detectChanges();
-      if (this.cookieService.get(`like-${this.authorId}-${this.postId}`) === 'true') {
-        this.likes+=1;
-        this.changeDetector.detectChanges();
-        this.postsService.saveLikeDislike(this.authorId, this.postId, this.likes, this.dislikes);
-        this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false');
-      }else{
-        this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false');
+    try{
+      this.liked = await this.postsService.checkLikedPost(this.postId); //set 'like' status
+      if(this.liked){
+        this.likeButton.style.color = "#FFABF3";
       }
-    });
+    }catch(error){
+      console.error("Error checking if post was liked: " + error);
+      this.liked = false;
+    }
+
   }
+  //save likes in DB
+  saveLikes() {
+    const savedLikes = localStorage.getItem(`like-${this.postId}`);
+    
+    this.postsService.saveLikes(this.authorId, this.postId, parseInt(savedLikes || "0", 10))
+    .subscribe(()=>{
+      //get likes
+      this.postsService.getLikes(this.authorId, this.postId).subscribe((response: any)=>{
+        this.likes = Number(response);
+        this.changeDetector.detectChanges();
+      });
+    })
+  }
+  
+  //save dislikes in DB
   saveDislikes(){
-    this.postsService.getDislikes(this.authorId, this.postId)
-      .subscribe((response: any) => {
+    const savedDislikes = localStorage.getItem(`dislike-${this.postId}`);
+    
+    this.postsService.saveDislikes(this.authorId, this.postId, parseInt(savedDislikes || "0", 10))
+    .subscribe(()=>{
+      //get dilikes
+      this.postsService.getDislikes(this.authorId, this.postId).subscribe((response: any)=>{
         this.dislikes = Number(response);
         this.changeDetector.detectChanges();
-        if (this.cookieService.get(`dislike-${this.authorId}-${this.postId}`) === 'true') {
-          this.dislikes+=1;
-          this.changeDetector.detectChanges();
-          this.postsService.saveLikeDislike(this.authorId, this.postId, this.likes, this.dislikes);
-          this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false');
-        }else{
-          this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false');
-        }
       });
+    })
   }
 
   handleReaction(action: 'like' | 'dislike') {
-    if (this.logged) {
-      const cookieKey = `${action}-${this.authorId}-${this.postId}`;
-
+    if (this.logged && this.authorId != this.cookieService.get('user')) {
+      //*ADD ANIMATION ON CLICK*
       if (action === 'like') {
-        if (!this.liked) {
-          this.likes += 1;
-          this.liked = true;
+        if (!this.liked) { //if 'like' status was false
+          this.likes += 1; // add like
+          this.liked = true; //set liked status
+          localStorage.setItem(`like-${this.postId}`, this.likes.toString());
+
+          //if the post was in dislike status, remove dislike
           if(this.disliked == true){
             this.dislikes = Math.max(0, this.dislikes - 1);
+            localStorage.setItem(`dislike-${this.postId}`, this.dislikes.toString());
             this.disliked = false;
           }
-          this.cookieService.set(cookieKey, 'true', 365);
-          this.cookieService.set(`dislike-${this.authorId}-${this.postId}`, 'false', 365);
-        } else {
-          this.likes -= 1;
-          this.liked = false;
-          this.cookieService.set(cookieKey, 'false', 365);
+        } else { //if like status was true
+          this.likes -= 1; //remove a like
+          localStorage.setItem(`like-${this.postId}`, this.likes.toString());
+          this.liked = false; //set 'like' status to false
+          //*CAMBIA STILE*
+          this.likeButton.style.color = "#fff";
         }
       } else if (action === 'dislike') {
         if (!this.disliked) {
           this.dislikes += 1;
+          localStorage.setItem(`dislike-${this.postId}`, this.dislikes.toString());
           this.disliked = true;
           if(this.liked == true){
             this.likes = Math.max(0, this.likes - 1);
             this.liked = false;
           }
-          this.cookieService.set(cookieKey, 'true', 365);
-          this.cookieService.set(`like-${this.authorId}-${this.postId}`, 'false', 365);
         } else {
           this.dislikes -= 1;
+          localStorage.setItem(`dislike-${this.postId}`, this.dislikes.toString());
           this.disliked = false;
-          this.cookieService.set(cookieKey, 'false', 365);
         }
       }
-    } else {
+    } else if(!this.logged){
       if (action === 'like') {
         this.canLike = false;
       } else {
@@ -165,6 +182,12 @@ export class PostComponent implements OnInit {
         } else {
           this.canDislike = true;
         }
+        this.changeDetector.detectChanges();
+      }, 2000);
+    } else if(this.authorId == this.cookieService.get('user')){
+      this.isAuthor = true;
+      setTimeout(() => {
+        this.isAuthor = false;
         this.changeDetector.detectChanges();
       }, 2000);
     }
