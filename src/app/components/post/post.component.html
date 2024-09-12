@@ -15,7 +15,7 @@
       <a (click)="handleReaction('like')" class="like-btn"><mat-icon>thumb_up</mat-icon></a>
       <p class="likes">{{likes}}</p>
       <mat-error *ngIf="!canLike">Sign up to like.</mat-error>
-      <a (click)="handleReaction('dislike')" class="like-btn"><mat-icon>thumb_down</mat-icon></a>
+      <a (click)="handleReaction('dislike')" class="dislike-btn"><mat-icon>thumb_down</mat-icon></a>
       <p class="dislikes">{{dislikes}}</p>
       <mat-error *ngIf="!canDislike">Sign up to dislike.</mat-error>
       <a (click)="comment()" class="comment-btn"><mat-icon>comment</mat-icon></a>
@@ -23,4 +23,4 @@
       <mat-error *ngIf="!canComment">Sign up to comment.</mat-error>
     </mat-card-actions>
 </mat-card>   
-<mat-error *ngIf="isAuthor">You can't like your own post.</mat-error>
+<mat-error *ngIf="isAuthor">You can't like or dislike your own post</mat-error>

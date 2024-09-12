@@ -85,8 +85,8 @@ export class PostsService {
     .subscribe();
   }
 
-  addLikedPost(postId: string) {
-    this.getLikedPosts()
+  addLikedPost(postId: string): Observable<any> {
+    return this.getLikedPosts()
       .pipe(
         map(response => {
           // Ensure response is an array, default to an empty array if not
@@ -106,38 +106,66 @@ export class PostsService {
           // Send updated list back to the server
           return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
         })
-      )
-      .subscribe({
-        next: response => {
-          console.log('Post added successfully:', response);
-        },
-        error: error => {
-          console.error('Error adding post:', error);
-        }
-      });
+      );
   }
+  addDislikedPost(postId: string): Observable<any> {
+    return this.getDislikedPosts()
+      .pipe(
+        map(response => {
+          // Ensure response is an array, default to an empty array if not
+          return Array.isArray(response) ? response : [];
+        }),
+        switchMap((currentDislikes: string[]) => {
+          let updatedDislikes = currentDislikes;
   
+          // Append postId to the existing list if it's not already present
+          if (!currentDislikes.includes(postId)) {
+            updatedDislikes = [...currentDislikes, postId];
+          }
   
-  getLikedPosts(){
-    return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/likedPosts.json`);
+          // Ensure the payload is properly formatted
+          const payload = { dislikedPosts: updatedDislikes };
+  
+          // Send updated list back to the server
+          return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
+        })
+      )
   }
 
-  async checkLikedPost(postId: string): Promise<boolean> {
-    try {
-      const likedPosts = await firstValueFrom(this.getLikedPosts());
-  
-      // Ensure likedPosts is an array
-      if (Array.isArray(likedPosts)) {
-        return likedPosts.includes(postId);
-      } else {
-        console.warn('Liked posts is not an array:', likedPosts);
-        return false;
-      }
-    } catch (error) {
-      console.error('Error checking liked post:', error);
-      return false;
-    }
+  getLikedPosts(): Observable<any>{
+    return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/likedPosts.json`);
   }
+  getDislikedPosts(): Observable<any>{
+    return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/dislikedPosts.json`);
+  }
+
+  // removeLikedPost(postId: string): Observable<any> {
+
+  // }
+  // removeDislikedPost(postId: string): Observable<any>{
+
+  // }
+  
+
+
+
+
+  // async checkLikedPost(postId: string): Promise<boolean> {
+  //   try {
+  //     const likedPosts = await firstValueFrom(this.getLikedPosts());
+  
+  //     // Ensure likedPosts is an array
+  //     if (Array.isArray(likedPosts)) {
+  //       return likedPosts.includes(postId);
+  //     } else {
+  //       console.warn('Liked posts is not an array:', likedPosts);
+  //       return false;
+  //     }
+  //   } catch (error) {
+  //     console.error('Error checking liked post:', error);
+  //     return false;
+  //   }
+  // }
 
   // Function to save likes
   saveLikes(authorId: string, postId: string, likes: number) {
