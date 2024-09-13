@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { CookieService } from 'ngx-cookie-service';
 import { Console, count } from 'console';
 import { PostComponent } from '../components/post/post.component';
-import { first, firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, first, firstValueFrom, map, Observable, of, switchMap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +13,7 @@ import { first, firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
 export class PostsService {
   postAuthor: string = "";
   allPosts: any[] = [];
+  likedPosts: string[] = [];
   postId: string = '';
   http: HttpClient = inject(HttpClient);
   constructor(private authService: AuthService, private cookieService: CookieService) { }
@@ -85,29 +86,49 @@ export class PostsService {
     .subscribe();
   }
 
-  addLikedPost(postId: string): Observable<any> {
+  addLikedPost(postId: string){
+    this.likedPosts.push(postId);
+    localStorage.setItem('likedPosts', JSON.stringify(this.likedPosts));
+    console.log("post id added");
+  }
+
+  addLikedPosts(): Observable<any> {
+    console.log("function gets called.");
     return this.getLikedPosts()
       .pipe(
-        map(response => {
-          // Ensure response is an array, default to an empty array if not
-          return Array.isArray(response) ? response : [];
-        }),
-        switchMap((currentLikes: string[]) => {
-          let updatedLikes = currentLikes;
+        switchMap((currentLikes: string[] | null | undefined) => {
+          console.log("i've been HERE!");
+          
+          // If currentLikes is null, initialize it as an empty array
+          let updatedLikes = currentLikes ? [...currentLikes] : [];
   
-          // Append new postId to the existing list if it's not already present
-          if (!currentLikes.includes(postId)) {
-            updatedLikes = [...currentLikes, postId];
+          // Load the likedPosts array from localStorage
+          const storedLikes = localStorage.getItem('likedPosts');
+          const newLikes = storedLikes ? JSON.parse(storedLikes) : [];
+  
+          // Only add new post ids that aren't already in updatedLikes
+          for (let like of newLikes) {
+            if (!updatedLikes.includes(like)) {
+              updatedLikes.push(like);
+              console.log("Adding like:", like);
+            }
           }
   
-          // Ensure the payload is properly formatted
+          console.log("Final liked posts:", updatedLikes);
+  
+          // Payload to send to Firebase
           const payload = { likedPosts: updatedLikes };
   
-          // Send updated list back to the server
+          // Clear localStorage after saving to Firebase
+          localStorage.removeItem('likedPosts');
+  
+          // Patch the data to Firebase
           return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
         })
       );
   }
+  
+  
   addDislikedPost(postId: string): Observable<any> {
     return this.getDislikedPosts()
       .pipe(
@@ -139,15 +160,26 @@ export class PostsService {
     return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/dislikedPosts.json`);
   }
 
-  removeLikedPost(postId: string): Observable<any> {
-    return this.getLikedPosts().pipe(
-      switchMap((likedPosts: string[])=>{
-        let updatedLikes: string[] = likedPosts.filter(id=>id!==postId) //remove post id
-        return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/posts/${postId}.json`,
-        {likes: updatedLikes});
-        })
-      )
-  }
+removeLikedPost(postId: string): Observable<any> {
+  return this.getLikedPosts().pipe(
+    switchMap((likedPosts: string[]) => {
+      // Remove the post ID from the liked posts array
+      const updatedLikes = likedPosts.filter(id => id !== postId);
+
+      // Prepare the data to send in the PATCH request
+      const patchData = { likedPosts: updatedLikes };
+
+      // Perform the PATCH request to update the user's likedPosts
+      return this.http.patch(
+        `${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`,
+        patchData
+      );
+    })
+  );
+}
+  
+  
+  
   // removeDislikedPost(postId: string): Observable<any>{
 
   // }

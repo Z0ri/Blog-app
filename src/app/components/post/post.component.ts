@@ -8,7 +8,7 @@ import { PostsService } from '../../services/posts.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CookieService } from 'ngx-cookie-service';
 import { NavigationEnd, Router } from '@angular/router';
-import { filter, map, switchMap } from 'rxjs';
+import { filter, map, of, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-post',
@@ -89,7 +89,6 @@ export class PostComponent implements OnInit, AfterViewInit {
     .subscribe(() => {
       this.saveLikes();
       this.saveDislikes();
-      this.checkReaction();
     });
 
     //check if post is in liked list
@@ -115,54 +114,10 @@ export class PostComponent implements OnInit, AfterViewInit {
       }
     })
     
-    this.checkReaction();
-    
     localStorage.removeItem(`like-${this.postId}`);
     localStorage.removeItem(`dislike-${this.postId}`);
     this.cookieService.delete(`like-${this.postId}`);
     this.cookieService.delete(`dislike-${this.postId}`);
-  }
-
-  //Check reaction when updating the page for the first time, meaning that post has still not been added to liked or disliked post section
-  checkReaction() {
-    if (this.cookieService.get(`like-${this.postId}`)=='true') {
-      this.postsService.addLikedPost(this.postId)
-        .pipe(
-          switchMap(() => this.postsService.getLikedPosts())
-        )
-        .subscribe({
-          next: (response: string[]) => {
-            if (response && response.includes(this.postId)) {
-              this.likeButton.style.color = "#FFABF3";
-              this.liked = true;
-              this.changeDetector.detectChanges(); // Ensure view updates
-            }
-          },
-          error: (error) => {
-            // Handle error if necessary
-            console.error('Error checking reactions', error);
-          }
-        });
-    }
-    if (localStorage.getItem(`dislike-${this.postId}`)) {
-      this.postsService.addDislikedPost(this.postId)
-        .pipe(
-          switchMap(() => this.postsService.getDislikedPosts())
-        )
-        .subscribe({
-          next: (response: string[]) => {
-            if (response && response.includes(this.postId)) {
-              this.dislikeButton.style.color = "#FFABF3";
-              this.disliked = true;
-              this.changeDetector.detectChanges(); // Ensure view updates
-            }
-          },
-          error: (error) => {
-            // Handle error if necessary
-            console.error('Error checking reactions', error);
-          }
-        });
-    }
   }
   
 
@@ -202,6 +157,7 @@ export class PostComponent implements OnInit, AfterViewInit {
             this.likes += 1; // add like
             this.liked = true; //set liked state
             this.likeButton.style.color = "#FFABF3"; //change button style
+            this.postsService.addLikedPost(this.postId);
             this.changeDetector.detectChanges();
             localStorage.setItem(`like-${this.postId}`, this.likes.toString());
             this.cookieService.set(`like-${this.postId}`, 'true'); //set cookie to keep track of status after refresh
