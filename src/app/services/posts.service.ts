@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { CookieService } from 'ngx-cookie-service';
 import { Console, count } from 'console';
 import { PostComponent } from '../components/post/post.component';
-import { catchError, first, firstValueFrom, map, Observable, of, switchMap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, first, firstValueFrom, map, Observable, of, Subject, switchMap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,9 @@ export class PostsService {
   likedPosts: string[] = [];
   postId: string = '';
   http: HttpClient = inject(HttpClient);
+
+  likesSaved$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+
   constructor(private authService: AuthService, private cookieService: CookieService) { }
 
   //fetch every posts in the DB
@@ -93,11 +96,9 @@ export class PostsService {
   }
 
   addLikedPosts(): Observable<any> {
-    console.log("function gets called.");
     return this.getLikedPosts()
       .pipe(
         switchMap((currentLikes: string[] | null | undefined) => {
-          console.log("i've been HERE!");
           
           // If currentLikes is null, initialize it as an empty array
           let updatedLikes = currentLikes ? [...currentLikes] : [];
@@ -110,18 +111,17 @@ export class PostsService {
           for (let like of newLikes) {
             if (!updatedLikes.includes(like)) {
               updatedLikes.push(like);
-              console.log("Adding like:", like);
             }
           }
-  
-          console.log("Final liked posts:", updatedLikes);
-  
+
+          // Notify posts 
+          this.likesSaved$.next(updatedLikes);
+
+          // Clear localStorage after saving
+          localStorage.removeItem('likedPosts');
+
           // Payload to send to Firebase
           const payload = { likedPosts: updatedLikes };
-  
-          // Clear localStorage after saving to Firebase
-          localStorage.removeItem('likedPosts');
-  
           // Patch the data to Firebase
           return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
         })

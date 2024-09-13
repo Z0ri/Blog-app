@@ -91,28 +91,16 @@ export class PostComponent implements OnInit, AfterViewInit {
       this.saveDislikes();
     });
 
-    //check if post is in liked list
-    this.postsService.getLikedPosts()
-    .subscribe((response: string[]) => {
-      if (response && response.includes(this.postId)) {
+    this.postsService.likesSaved$
+    .subscribe((response: string[])=>{
+      const likesSaved = response;
+
+      if(likesSaved.includes(this.postId)){
         this.likeButton.style.color = "#FFABF3";
         this.liked = true;
         this.changeDetector.detectChanges(); // Ensure view updates
-        //if(cookieService.get('liked') == 'true'){}
       }
-    })
-
-    //check if post is in disliked list
-    this.postsService.getDislikedPosts()
-    .subscribe((response: string[])=>{
-      if(response){
-        if(response.includes(this.postId)){
-          this.dislikeButton.style.color = "#FFABF3";
-          this.disliked = true;
-          this.changeDetector.detectChanges(); //Ensure view updates
-        }
-      }
-    })
+    });
     
     localStorage.removeItem(`like-${this.postId}`);
     localStorage.removeItem(`dislike-${this.postId}`);
