@@ -92,7 +92,7 @@ export class PostComponent implements OnInit, AfterViewInit {
       this.checkReaction();
     });
 
-    //check if post was liked by the user before
+    //check if post is in liked list
     this.postsService.getLikedPosts()
     .subscribe((response: string[]) => {
       if (response && response.includes(this.postId)) {
@@ -103,8 +103,7 @@ export class PostComponent implements OnInit, AfterViewInit {
       }
     })
 
-    /*check if post is post liked or disliked section*/
-    //check if post was disliked by the user before
+    //check if post is in disliked list
     this.postsService.getDislikedPosts()
     .subscribe((response: string[])=>{
       if(response){
@@ -120,11 +119,13 @@ export class PostComponent implements OnInit, AfterViewInit {
     
     localStorage.removeItem(`like-${this.postId}`);
     localStorage.removeItem(`dislike-${this.postId}`);
+    this.cookieService.delete(`like-${this.postId}`);
+    this.cookieService.delete(`dislike-${this.postId}`);
   }
 
   //Check reaction when updating the page for the first time, meaning that post has still not been added to liked or disliked post section
   checkReaction() {
-    if (localStorage.getItem(`like-${this.postId}`)) {
+    if (this.cookieService.get(`like-${this.postId}`)=='true') {
       this.postsService.addLikedPost(this.postId)
         .pipe(
           switchMap(() => this.postsService.getLikedPosts())
@@ -203,11 +204,13 @@ export class PostComponent implements OnInit, AfterViewInit {
             this.likeButton.style.color = "#FFABF3"; //change button style
             this.changeDetector.detectChanges();
             localStorage.setItem(`like-${this.postId}`, this.likes.toString());
-            
+            this.cookieService.set(`like-${this.postId}`, 'true'); //set cookie to keep track of status after refresh
+            this.cookieService.set(`dislike-${this.postId}`, 'false');
             //if the post was in dislike status, remove dislike
             if(this.disliked == true){
               this.dislikes = Math.max(0, this.dislikes - 1);
               localStorage.setItem(`dislike-${this.postId}`, this.dislikes.toString());
+              this.cookieService.set(`like-${this.postId}`, 'false');
               this.dislikeButton.style.color = "#fff"; //change button style
               this.changeDetector.detectChanges();
             }
@@ -215,6 +218,8 @@ export class PostComponent implements OnInit, AfterViewInit {
         } else { //if like status was true
           this.likes -= 1; //remove a like
           localStorage.setItem(`like-${this.postId}`, this.likes.toString());
+          this.cookieService.set(`like-${this.postId}`, 'false');
+
           this.liked = false; //set 'like' state to false
           //change style if unliked
           this.likeButton.style.color = "#fff";
@@ -226,6 +231,8 @@ export class PostComponent implements OnInit, AfterViewInit {
             this.dislikeButton.style.color = "#FFABF3"; //change button style
             this.changeDetector.detectChanges();
             localStorage.setItem(`dislike-${this.postId}`, this.dislikes.toString());
+            this.cookieService.set(`dislike-${this.postId}`, 'true');
+            this.cookieService.set(`like-${this.postId}`, 'false');
 
             if(this.liked == true){
               this.likes = Math.max(0, this.likes - 1);
@@ -236,6 +243,8 @@ export class PostComponent implements OnInit, AfterViewInit {
         } else {
           this.dislikes -= 1;
           localStorage.setItem(`dislike-${this.postId}`, this.dislikes.toString());
+          this.cookieService.set(`dislike-${this.postId}`, 'false');
+          
           this.disliked = false;
           //change style if undisliked
           this.dislikeButton.style.color = "#fff";

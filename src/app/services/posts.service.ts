@@ -139,9 +139,15 @@ export class PostsService {
     return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/dislikedPosts.json`);
   }
 
-  // removeLikedPost(postId: string): Observable<any> {
-
-  // }
+  removeLikedPost(postId: string): Observable<any> {
+    return this.getLikedPosts().pipe(
+      switchMap((likedPosts: string[])=>{
+        let updatedLikes: string[] = likedPosts.filter(id=>id!==postId) //remove post id
+        return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/posts/${postId}.json`,
+        {likes: updatedLikes});
+        })
+      )
+  }
   // removeDislikedPost(postId: string): Observable<any>{
 
   // }
