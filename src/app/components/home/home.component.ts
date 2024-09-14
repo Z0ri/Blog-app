@@ -26,24 +26,31 @@ export class HomeComponent implements OnInit{
   ngOnInit(): void {
     this.allPosts = this.postsService.getAllPosts(); //get all posts in the DB
     this.postsService.createAllPostElements(this.posts); //create a card for each post
+
     this.postsService.saveReactions('likedPosts').subscribe({
       next: (response) => console.log("Liked posts successfully saved: ", response),
       error: (error) => console.error("Error saving liked posts: ", error)
     });
+
     this.postsService.saveReactions('dislikedPosts').subscribe({
       next: (response) => console.log("Disliked posts successfully saved: ", response),
       error: (error) => console.error("Error saving disliked posts: ", error)
     });
+    
     //Save likes/dislikes when route changes
     this.router.events
     .pipe(filter(event => event instanceof NavigationEnd))
     .subscribe(() => {
       this.postsService.saveReactions('likedPosts').subscribe({
-        next: (response) => console.log("Liked posts successfully saved: ", response),
+        next: (response) => {
+          console.log("Liked posts successfully saved: ", response);
+        },
         error: (error) => console.error("Error saving liked posts: ", error)
       });
       this.postsService.saveReactions('dislikedPosts').subscribe({
-        next: (response) => console.log("Disliked posts successfully saved: ", response),
+        next: (response) => {
+          console.log("Disliked posts successfully saved: ", response)
+        },
         error: (error) => console.error("Error saving disliked posts: ", error)
       });
     });

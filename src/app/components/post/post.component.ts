@@ -126,9 +126,9 @@ export class PostComponent implements OnInit, AfterViewInit {
       if (action === 'like') {
         if (!this.liked) { //if 'like' status was false
             this.likes += 1; // add like
+            this.postsService.addReaction(this.postId, 'like'); //add to liked array
             this.liked = true; //set liked state
             this.likeButton.style.color = "#FFABF3"; //change button style
-            this.postsService.addReaction(this.postId, 'like');
             this.changeDetector.detectChanges();
             localStorage.setItem(`like-${this.postId}`, this.likes.toString());
             this.cookieService.set(`like-${this.postId}`, 'true'); //set cookie to keep track of status after refresh

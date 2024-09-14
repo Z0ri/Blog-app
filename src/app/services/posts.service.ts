@@ -3,7 +3,6 @@ import { Post } from '../models/post';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
 import { CookieService } from 'ngx-cookie-service';
-import { Console, count } from 'console';
 import { PostComponent } from '../components/post/post.component';
 import { BehaviorSubject, catchError, first, firstValueFrom, map, Observable, of, Subject, switchMap, throwError } from 'rxjs';
 
@@ -12,10 +11,15 @@ import { BehaviorSubject, catchError, first, firstValueFrom, map, Observable, of
 })
 export class PostsService {
   postAuthor: string = "";
+
   allPosts: any[] = [];
+  likes: any[] = [];
+  dislikes: any[] = [];
   dislikedPosts: string[] = [];
   likedPosts: string[] = [];
   removedLikes: string[] = [];
+  removedDisliked: string[] = [];
+
   postId: string = '';
   http: HttpClient = inject(HttpClient);
 
@@ -92,92 +96,86 @@ export class PostsService {
     .subscribe();
   }
 
+  
   addReaction(postId: string, reactionName: "like" | "dislike"){
     if(reactionName == "like"){
       this.likedPosts.push(postId);
-      localStorage.setItem('likedPosts', JSON.stringify(this.likedPosts));
-      console.log("added like ", this.likedPosts);
+      this.cookieService.set('likedPosts', JSON.stringify(this.likedPosts));
+      console.log("added like ", this.cookieService.get('likedPosts'));
     }else{
       this.dislikedPosts.push(postId);
-      localStorage.setItem('dislikedPosts', JSON.stringify(this.dislikedPosts));
-      console.log("added dislike ", this.dislikedPosts);
+      this.cookieService.set('dislikedPosts', JSON.stringify(this.dislikedPosts));
+      console.log("added dislike ", this.cookieService.get('dislikedPosts'));
     }
   }
-
+  //substract reaction
   removeReaction(postId: string, reactionName: "like" | "dislike") {
     if(reactionName == "like"){
       this.likedPosts = this.likedPosts.filter(id=>id!=postId);
-      localStorage.setItem('likedPosts', JSON.stringify(this.likedPosts));
+      this.cookieService.set('likedPosts', JSON.stringify(this.likedPosts));
       console.log("removed like ", this.likedPosts);
     }else{
       this.dislikedPosts = this.dislikedPosts.filter(id=>id!=postId);
-      localStorage.setItem('dislikedPosts', JSON.stringify(this.dislikedPosts));
+      this.cookieService.set('dislikedPosts', JSON.stringify(this.dislikedPosts));
       console.log("removed dislike ", this.dislikedPosts);
     }
   }
 
-
+  //save likes/dislikes in likedPosts/dislikePosts in DB
   saveReactions(reactionName: "dislikedPosts" | "likedPosts"): Observable<any> {
-    if(reactionName == "likedPosts"){
-      return this.getLikedPosts()
-      .pipe(
+    if (reactionName === "likedPosts") {
+      return this.getLikedPosts().pipe(
         switchMap((currentLikes: string[] | null | undefined) => {
-          let updatedLikes = currentLikes ? [...currentLikes] : [];
-  
-          // Load the likedPosts array from localStorage
-          const storedLikes = localStorage.getItem('likedPosts');
+          let updatedLikes = currentLikes ? [...currentLikes] : []; 
+          
+          const storedLikes = this.cookieService.get('likedPosts');
           const newLikes = storedLikes ? JSON.parse(storedLikes) : [];
   
-          // Only add new post ids that aren't already in updatedLikes
-          for (let like of newLikes) {
-            if (!updatedLikes.includes(like)) {
-              updatedLikes.push(like);
-            }
+          // Compare sorted arrays to check for changes
+          const hasChanges = JSON.stringify(newLikes.sort()) !== JSON.stringify(updatedLikes.sort());
+  
+          if (hasChanges) {
+            updatedLikes = Array.from(new Set([...updatedLikes, ...newLikes]));  // Merge newLikes into updatedLikes
+  
+            this.likesSaved$.next(updatedLikes);
+  
+            this.cookieService.delete('likedPosts');
+  
+            const payload = { likedPosts: updatedLikes };
+            return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
+          } else {
+            this.likesSaved$.next(updatedLikes);
+            return of("No changes");
           }
-
-          // Notify posts 
-          this.likesSaved$.next(updatedLikes);
-
-          // Clear localStorage after saving
-          localStorage.removeItem('likedPosts');
-
-          // Payload to send to Firebase
-          const payload = { likedPosts: updatedLikes };
-          return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
         })
       );
     } else {
-      return this.getDislikedPosts()
-      .pipe(
+      return this.getDislikedPosts().pipe(
         switchMap((currentDislikes: string[] | null | undefined) => {
-          
           let updatedDislikes = currentDislikes ? [...currentDislikes] : [];
   
-          // Correctly load the dislikedPosts array from localStorage
-          const storedDislikes = localStorage.getItem('dislikedPosts'); 
+          const storedDislikes = this.cookieService.get('dislikedPosts'); 
           const newDislikes = storedDislikes ? JSON.parse(storedDislikes) : [];
   
-          // Only add new post ids that aren't already in updatedDislikes
-          for (let dislike of newDislikes) {
-            if (!updatedDislikes.includes(dislike)) {
-              updatedDislikes.push(dislike);
-            }
+          const hasChanges = JSON.stringify(newDislikes.sort()) !== JSON.stringify(updatedDislikes.sort());
+  
+          if (hasChanges) {
+            updatedDislikes = Array.from(new Set([...updatedDislikes, ...newDislikes]));  // Merge newDislikes into updatedDislikes
+  
+            this.dislikesSaved$.next(updatedDislikes);
+  
+            this.cookieService.delete('dislikedPosts');
+  
+            const payload = { dislikedPosts: updatedDislikes };
+            return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
+          } else {
+            this.dislikesSaved$.next(updatedDislikes);
+            return of("No changes");
           }
-
-          // Notify posts 
-          this.dislikesSaved$.next(updatedDislikes);
-
-          // Clear localStorage after saving
-          localStorage.removeItem('dislikedPosts');  // Ensure it's the correct key here too
-
-          // Payload to send to Firebase
-          const payload = { dislikedPosts: updatedDislikes };
-          return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
         })
       );
     }
   }
-
 
   getLikedPosts(): Observable<any>{
     return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/likedPosts.json`);
@@ -185,25 +183,6 @@ export class PostsService {
   getDislikedPosts(): Observable<any>{
     return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/dislikedPosts.json`);
   }
-
-  // Function to save likes
-  saveLikes(authorId: string, postId: string, likes: number) {
-    if (likes && likes >= 0) {
-      return this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { like: likes });
-    }else{
-      return of({});
-    }
-  }
-
-  // Function to save dislikes
-  saveDislikes(authorId: string, postId: string, dislikes: number) {
-    if (dislikes && dislikes >= 0) {
-      return this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { dislike: dislikes });
-    }else{
-      return of({})
-    }
-  }
-
   
   getLikes(authorId: string, postId: string){
     return this.http.get(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}/like.json`);
