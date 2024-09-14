@@ -79,16 +79,15 @@ export class PostComponent implements OnInit, AfterViewInit {
       this.changeDetector.detectChanges(); // Ensure view updates
     });
 
-    //Save previous likes/dislikes when page refreshes
-    this.saveLikes();// Save likes 
-    this.saveDislikes();// Save dislikes
-    
-    //Save likes/dislikes when route changes
-    this.router.events
-    .pipe(filter(event => event instanceof NavigationEnd))
-    .subscribe(() => {
-      this.saveLikes();
-      this.saveDislikes();
+    //get likes
+    this.postsService.getLikes(this.authorId, this.postId).subscribe((response: any)=>{
+      this.likes = Number(response);
+      this.changeDetector.detectChanges();
+    });
+    //get dilikes
+    this.postsService.getDislikes(this.authorId, this.postId).subscribe((response: any)=>{
+      this.dislikes = Number(response);
+      this.changeDetector.detectChanges();
     });
 
     this.postsService.likesSaved$
@@ -96,8 +95,21 @@ export class PostComponent implements OnInit, AfterViewInit {
       const likesSaved = response;
 
       if(likesSaved.includes(this.postId)){
-        this.likeButton.style.color = "#FFABF3";
+        if(this.likeButton){
+          this.likeButton.style.color = "#FFABF3";
+        }
         this.liked = true;
+        this.changeDetector.detectChanges(); // Ensure view updates
+      }
+    });
+    this.postsService.dislikesSaved$
+    .subscribe((response: string[])=>{
+      const dislikeSaved = response;
+      if(dislikeSaved.includes(this.postId)){
+        if(this.dislikeButton){
+          this.dislikeButton.style.color = "#FFABF3";
+        }
+        this.disliked = true;
         this.changeDetector.detectChanges(); // Ensure view updates
       }
     });
@@ -106,35 +118,6 @@ export class PostComponent implements OnInit, AfterViewInit {
     localStorage.removeItem(`dislike-${this.postId}`);
     this.cookieService.delete(`like-${this.postId}`);
     this.cookieService.delete(`dislike-${this.postId}`);
-  }
-  
-
-  //save likes in DB
-  saveLikes() {
-    const savedLikes = localStorage.getItem(`like-${this.postId}`);
-
-    this.postsService.saveLikes(this.authorId, this.postId, parseInt(savedLikes || "0", 10))
-    .subscribe(()=>{
-      //get likes
-      this.postsService.getLikes(this.authorId, this.postId).subscribe((response: any)=>{
-        this.likes = Number(response);
-        this.changeDetector.detectChanges();
-      });
-    })
-  }
-  
-  //save dislikes in DB
-  saveDislikes(){
-    const savedDislikes = localStorage.getItem(`dislike-${this.postId}`);
-    
-    this.postsService.saveDislikes(this.authorId, this.postId, parseInt(savedDislikes || "0", 10))
-    .subscribe(()=>{
-      //get dilikes
-      this.postsService.getDislikes(this.authorId, this.postId).subscribe((response: any)=>{
-        this.dislikes = Number(response);
-        this.changeDetector.detectChanges();
-      });
-    })
   }
 
   handleReaction(action: 'like' | 'dislike') {
@@ -145,7 +128,7 @@ export class PostComponent implements OnInit, AfterViewInit {
             this.likes += 1; // add like
             this.liked = true; //set liked state
             this.likeButton.style.color = "#FFABF3"; //change button style
-            this.postsService.addLikedPost(this.postId);
+            this.postsService.addReaction(this.postId, 'like');
             this.changeDetector.detectChanges();
             localStorage.setItem(`like-${this.postId}`, this.likes.toString());
             this.cookieService.set(`like-${this.postId}`, 'true'); //set cookie to keep track of status after refresh
@@ -153,6 +136,7 @@ export class PostComponent implements OnInit, AfterViewInit {
             //if the post was in dislike status, remove dislike
             if(this.disliked == true){
               this.dislikes = Math.max(0, this.dislikes - 1);
+              this.postsService.removeReaction(this.postId, 'dislike');
               localStorage.setItem(`dislike-${this.postId}`, this.dislikes.toString());
               this.cookieService.set(`like-${this.postId}`, 'false');
               this.dislikeButton.style.color = "#fff"; //change button style
@@ -161,6 +145,7 @@ export class PostComponent implements OnInit, AfterViewInit {
             this.disliked = false; // set dislike state to false
         } else { //if like status was true
           this.likes -= 1; //remove a like
+          this.postsService.removeReaction(this.postId, 'like');
           localStorage.setItem(`like-${this.postId}`, this.likes.toString());
           this.cookieService.set(`like-${this.postId}`, 'false');
 
@@ -171,6 +156,7 @@ export class PostComponent implements OnInit, AfterViewInit {
       } else if (action === 'dislike') {
         if (!this.disliked) {
             this.dislikes += 1;
+            this.postsService.addReaction(this.postId, 'dislike');
             this.disliked = true;
             this.dislikeButton.style.color = "#FFABF3"; //change button style
             this.changeDetector.detectChanges();
@@ -180,12 +166,14 @@ export class PostComponent implements OnInit, AfterViewInit {
 
             if(this.liked == true){
               this.likes = Math.max(0, this.likes - 1);
+              this.postsService.removeReaction(this.postId, 'like');
               this.likeButton.style.color = "#fff"; //change button style
               this.changeDetector.detectChanges();
             }
             this.liked = false; //set like state to false
         } else {
           this.dislikes -= 1;
+          this.postsService.removeReaction(this.postId, 'dislike');
           localStorage.setItem(`dislike-${this.postId}`, this.dislikes.toString());
           this.cookieService.set(`dislike-${this.postId}`, 'false');
           
@@ -219,6 +207,8 @@ export class PostComponent implements OnInit, AfterViewInit {
   }
 
   comment() {
+    console.log(`localstorage('likedPosts'): ${localStorage.getItem("likedPosts")}`);
+    console.log(`localstorage('dislikedPosts'): ${localStorage.getItem("dislikedPosts")}`);
     if (this.logged) {
       this.canComment = true;
       this.postsService.comment();

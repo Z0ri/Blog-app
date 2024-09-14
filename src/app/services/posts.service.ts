@@ -13,11 +13,14 @@ import { BehaviorSubject, catchError, first, firstValueFrom, map, Observable, of
 export class PostsService {
   postAuthor: string = "";
   allPosts: any[] = [];
+  dislikedPosts: string[] = [];
   likedPosts: string[] = [];
+  removedLikes: string[] = [];
   postId: string = '';
   http: HttpClient = inject(HttpClient);
 
   likesSaved$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+  dislikesSaved$:BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
 
   constructor(private authService: AuthService, private cookieService: CookieService) { }
 
@@ -89,18 +92,36 @@ export class PostsService {
     .subscribe();
   }
 
-  addLikedPost(postId: string){
-    this.likedPosts.push(postId);
-    localStorage.setItem('likedPosts', JSON.stringify(this.likedPosts));
-    console.log("post id added");
+  addReaction(postId: string, reactionName: "like" | "dislike"){
+    if(reactionName == "like"){
+      this.likedPosts.push(postId);
+      localStorage.setItem('likedPosts', JSON.stringify(this.likedPosts));
+      console.log("added like ", this.likedPosts);
+    }else{
+      this.dislikedPosts.push(postId);
+      localStorage.setItem('dislikedPosts', JSON.stringify(this.dislikedPosts));
+      console.log("added dislike ", this.dislikedPosts);
+    }
   }
 
-  addLikedPosts(): Observable<any> {
-    return this.getLikedPosts()
+  removeReaction(postId: string, reactionName: "like" | "dislike") {
+    if(reactionName == "like"){
+      this.likedPosts = this.likedPosts.filter(id=>id!=postId);
+      localStorage.setItem('likedPosts', JSON.stringify(this.likedPosts));
+      console.log("removed like ", this.likedPosts);
+    }else{
+      this.dislikedPosts = this.dislikedPosts.filter(id=>id!=postId);
+      localStorage.setItem('dislikedPosts', JSON.stringify(this.dislikedPosts));
+      console.log("removed dislike ", this.dislikedPosts);
+    }
+  }
+
+
+  saveReactions(reactionName: "dislikedPosts" | "likedPosts"): Observable<any> {
+    if(reactionName == "likedPosts"){
+      return this.getLikedPosts()
       .pipe(
         switchMap((currentLikes: string[] | null | undefined) => {
-          
-          // If currentLikes is null, initialize it as an empty array
           let updatedLikes = currentLikes ? [...currentLikes] : [];
   
           // Load the likedPosts array from localStorage
@@ -122,36 +143,41 @@ export class PostsService {
 
           // Payload to send to Firebase
           const payload = { likedPosts: updatedLikes };
-          // Patch the data to Firebase
           return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
         })
       );
-  }
-  
-  
-  addDislikedPost(postId: string): Observable<any> {
-    return this.getDislikedPosts()
+    } else {
+      return this.getDislikedPosts()
       .pipe(
-        map(response => {
-          // Ensure response is an array, default to an empty array if not
-          return Array.isArray(response) ? response : [];
-        }),
-        switchMap((currentDislikes: string[]) => {
-          let updatedDislikes = currentDislikes;
+        switchMap((currentDislikes: string[] | null | undefined) => {
+          
+          let updatedDislikes = currentDislikes ? [...currentDislikes] : [];
   
-          // Append postId to the existing list if it's not already present
-          if (!currentDislikes.includes(postId)) {
-            updatedDislikes = [...currentDislikes, postId];
+          // Correctly load the dislikedPosts array from localStorage
+          const storedDislikes = localStorage.getItem('dislikedPosts'); 
+          const newDislikes = storedDislikes ? JSON.parse(storedDislikes) : [];
+  
+          // Only add new post ids that aren't already in updatedDislikes
+          for (let dislike of newDislikes) {
+            if (!updatedDislikes.includes(dislike)) {
+              updatedDislikes.push(dislike);
+            }
           }
-  
-          // Ensure the payload is properly formatted
+
+          // Notify posts 
+          this.dislikesSaved$.next(updatedDislikes);
+
+          // Clear localStorage after saving
+          localStorage.removeItem('dislikedPosts');  // Ensure it's the correct key here too
+
+          // Payload to send to Firebase
           const payload = { dislikedPosts: updatedDislikes };
-  
-          // Send updated list back to the server
           return this.http.patch(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, payload);
         })
-      )
+      );
+    }
   }
+
 
   getLikedPosts(): Observable<any>{
     return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/likedPosts.json`);
@@ -159,51 +185,6 @@ export class PostsService {
   getDislikedPosts(): Observable<any>{
     return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/dislikedPosts.json`);
   }
-
-removeLikedPost(postId: string): Observable<any> {
-  return this.getLikedPosts().pipe(
-    switchMap((likedPosts: string[]) => {
-      // Remove the post ID from the liked posts array
-      const updatedLikes = likedPosts.filter(id => id !== postId);
-
-      // Prepare the data to send in the PATCH request
-      const patchData = { likedPosts: updatedLikes };
-
-      // Perform the PATCH request to update the user's likedPosts
-      return this.http.patch(
-        `${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`,
-        patchData
-      );
-    })
-  );
-}
-  
-  
-  
-  // removeDislikedPost(postId: string): Observable<any>{
-
-  // }
-  
-
-
-
-
-  // async checkLikedPost(postId: string): Promise<boolean> {
-  //   try {
-  //     const likedPosts = await firstValueFrom(this.getLikedPosts());
-  
-  //     // Ensure likedPosts is an array
-  //     if (Array.isArray(likedPosts)) {
-  //       return likedPosts.includes(postId);
-  //     } else {
-  //       console.warn('Liked posts is not an array:', likedPosts);
-  //       return false;
-  //     }
-  //   } catch (error) {
-  //     console.error('Error checking liked post:', error);
-  //     return false;
-  //   }
-  // }
 
   // Function to save likes
   saveLikes(authorId: string, postId: string, likes: number) {
@@ -231,7 +212,7 @@ removeLikedPost(postId: string): Observable<any> {
     return this.http.get<string>(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}/dislike.json`);
   }
 
-
+  
   //on comment click
   comment(){
     //add comment function
