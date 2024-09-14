@@ -78,18 +78,21 @@ export class PostComponent implements OnInit, AfterViewInit {
       this.accountImg_element.style.backgroundImage = `url(${this.accountImg})`;
       this.changeDetector.detectChanges(); // Ensure view updates
     });
+    
+    //Save likes/dislikes when route changes
+    this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe(() => {
+      this.saveLikes();
+      this.saveDislikes();
+    })
 
-    //get likes
-    this.postsService.getLikes(this.authorId, this.postId).subscribe((response: any)=>{
-      this.likes = Number(response);
-      this.changeDetector.detectChanges();
-    });
-    //get dilikes
-    this.postsService.getDislikes(this.authorId, this.postId).subscribe((response: any)=>{
-      this.dislikes = Number(response);
-      this.changeDetector.detectChanges();
-    });
+    
+    this.saveLikes();
+    this.saveDislikes();
 
+
+    //coloring like if it's liked
     this.postsService.likesSaved$
     .subscribe((response: string[])=>{
       const likesSaved = response;
@@ -119,6 +122,33 @@ export class PostComponent implements OnInit, AfterViewInit {
     this.cookieService.delete(`like-${this.postId}`);
     this.cookieService.delete(`dislike-${this.postId}`);
   }
+    //save likes in DB
+    saveLikes() {
+      const savedLikes = localStorage.getItem(`like-${this.postId}`);
+  
+      this.postsService.saveLikes(this.authorId, this.postId, parseInt(savedLikes || "0", 10))
+      .subscribe(()=>{
+        //get likes
+        this.postsService.getLikes(this.authorId, this.postId).subscribe((response: any)=>{
+          this.likes = Number(response);
+          this.changeDetector.detectChanges();
+        });
+      })
+    }
+  
+    //save dislikes in DB
+    saveDislikes(){
+      const savedDislikes = localStorage.getItem(`dislike-${this.postId}`);
+  
+      this.postsService.saveDislikes(this.authorId, this.postId, parseInt(savedDislikes || "0", 10))
+      .subscribe(()=>{
+        //get dilikes
+        this.postsService.getDislikes(this.authorId, this.postId).subscribe((response: any)=>{
+          this.dislikes = Number(response);
+          this.changeDetector.detectChanges();
+        });
+      })
+    }
 
   handleReaction(action: 'like' | 'dislike') {
     if (this.logged && this.authorId != this.cookieService.get('user')) {
@@ -131,6 +161,7 @@ export class PostComponent implements OnInit, AfterViewInit {
             this.likeButton.style.color = "#FFABF3"; //change button style
             this.changeDetector.detectChanges();
             localStorage.setItem(`like-${this.postId}`, this.likes.toString());
+            console.log(this.likes);
             this.cookieService.set(`like-${this.postId}`, 'true'); //set cookie to keep track of status after refresh
             this.cookieService.set(`dislike-${this.postId}`, 'false');
             //if the post was in dislike status, remove dislike
@@ -145,6 +176,7 @@ export class PostComponent implements OnInit, AfterViewInit {
             this.disliked = false; // set dislike state to false
         } else { //if like status was true
           this.likes -= 1; //remove a like
+          console.log(this.likes);
           this.postsService.removeReaction(this.postId, 'like');
           localStorage.setItem(`like-${this.postId}`, this.likes.toString());
           this.cookieService.set(`like-${this.postId}`, 'false');
@@ -207,8 +239,8 @@ export class PostComponent implements OnInit, AfterViewInit {
   }
 
   comment() {
-    console.log(`localstorage('likedPosts'): ${localStorage.getItem("likedPosts")}`);
-    console.log(`localstorage('dislikedPosts'): ${localStorage.getItem("dislikedPosts")}`);
+    console.log(`localstorage('likedPosts'): ${localStorage.getItem(`like-${this.postId}`)}`);
+    console.log(`localstorage('dislikedPosts'): ${localStorage.getItem(`dislike-${this.postId}`)}`);
     if (this.logged) {
       this.canComment = true;
       this.postsService.comment();

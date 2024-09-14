@@ -176,7 +176,21 @@ export class PostsService {
       );
     }
   }
-
+  saveLikes(authorId: string, postId: string, likes: number) {
+    if (likes && likes >= 0) {
+      return this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { like: likes });
+    }else{
+      return of({});
+    }
+  }
+  // Function to save dislikes
+  saveDislikes(authorId: string, postId: string, dislikes: number) {
+    if (dislikes && dislikes >= 0) {
+      return this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { dislike: dislikes });
+    }else{
+      return of({})
+    }
+  }
   getLikedPosts(): Observable<any>{
     return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/likedPosts.json`);
   }
