@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, viewChild, ViewChild, ViewContainerRef } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { PostComponent } from "../post/post.component";
@@ -6,6 +6,8 @@ import { AuthService } from '../../services/auth.service';
 import { firstValueFrom } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { FireStorageService } from '../../services/fire-storage.service';
+import { PostsService } from '../../services/posts.service';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-profile',
@@ -16,20 +18,45 @@ import { FireStorageService } from '../../services/fire-storage.service';
 })
 export class ProfileComponent implements OnInit{
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('profilePosts', { read: ViewContainerRef, static: true }) posts!: ViewContainerRef;
+
   proPic: string | ArrayBuffer | null = "account_circle.png";
   uploadPic: File | null = null;
   accountName: string = "";
+  profilePosts: any[] = [];
+  postCounter: number = 0;
+  followerCounter: number = 0;
+  followingCounter: number = 0;
 
   constructor(
     private authService: AuthService,
-    private fireStorageService: FireStorageService
+    private cookieService: CookieService,
+    private fireStorageService: FireStorageService,
+    private postsService: PostsService,
+    private changeDetector: ChangeDetectorRef
   ){}
   async ngOnInit() {
     //get username of the current user
     this.accountName = await firstValueFrom(this.authService.getUsername());
     //set profile picture
     this.proPic = await firstValueFrom(this.authService.getProfilePic());
-    console.log(`propic: ${this.proPic}`)
+    //load posts in the container
+    this.postsService.getUserPosts(this.cookieService.get('user')).subscribe({
+      next: (response: any) => {
+        if(response){
+          this.profilePosts = [];
+          for(let post of Object.keys(response)){
+            this.profilePosts.push(response[post]);
+          }
+          //update post's counter
+          this.postCounter = this.profilePosts.length;
+          this.changeDetector.detectChanges(); //Ensure view updates
+          //create all user's posts
+          this.postsService.createUserPosts(this.posts, this.profilePosts);
+        }
+      },
+      error: (error: any) => console.error("Error fetching profile's posts: " + error)
+    });
   }
   edit(){
     this.fileInput.nativeElement.click(); //simulate the actual click on the element #fileInput

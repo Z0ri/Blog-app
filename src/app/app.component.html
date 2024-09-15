@@ -9,7 +9,7 @@
             <button mat-button routerLink="sign-up" *ngIf="!logged"><mat-icon>person_add</mat-icon>Sign up</button>
             <button mat-button routerLink="explore"><mat-icon>Explore</mat-icon>Explore</button>
             <button mat-button routerLink="search"><mat-icon>search</mat-icon>Search</button>
-            <button mat-button routerLink="profile"><mat-icon>account_circle</mat-icon>{{username}}</button>
+            <button mat-button routerLink="profile" *ngIf="logged"><mat-icon>account_circle</mat-icon>{{username}}</button>
             <button mat-button routerLink="new-post" *ngIf="logged"><mat-icon>add_circle</mat-icon>Create new post</button>
         
             <div class="settingsBtn-container">

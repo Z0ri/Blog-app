@@ -1,10 +1,7 @@
-.post {
-    margin-top: 50px;
-    max-width: 500px;
+.post{
+    overflow: hidden;
 }
 .post-img{
-    width: 498px;
-    height: 300px;
     margin-top: 20px;
     margin-bottom: 20px;
 }
@@ -31,6 +28,7 @@
 }
 .username{
     font-size: 18px;
+    color: purple;
 }
 
 .like-btn, .dislike-btn, .comment-btn{

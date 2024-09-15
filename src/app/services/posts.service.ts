@@ -47,6 +47,11 @@ export class PostsService {
     });
     return this.allPosts;
   }
+
+  //fetch every post of a user
+  getUserPosts(authorId: string): Observable<any>{
+    return this.http.get(`${this.authService.getDatabaseURL()}/users/${authorId}/posts.json`);
+  }
   
   // get profile pic of the author of the post
   getPostProfilePic(authorId: string): Observable<any> {
@@ -64,10 +69,33 @@ export class PostsService {
       componentRef.instance.author = post.author;
       componentRef.instance.authorId = post.authorId;
       componentRef.instance.postId = post.id;
+
       componentRefs.push(componentRef);
     }
 
     return componentRefs;
+  }
+  //create a post element for each post saved in a user's posts section
+  createUserPosts(container: ViewContainerRef, posts: any[]) {
+    const postRefs: ComponentRef<PostComponent>[] = [];
+  
+    for (let post of posts) {
+      const postRef = container.createComponent(PostComponent);
+      postRef.instance.title = post.title;
+      postRef.instance.description = post.description;
+      postRef.instance.url = post.url;
+      postRef.instance.author = post.author;
+      postRef.instance.authorId = post.authorId;
+      postRef.instance.postId = post.id;
+  
+      // Aggiungi una classe CSS al singolo post creato
+      postRef.location.nativeElement.classList.add('profile-post');
+  
+      // Aggiungi il riferimento del post all'array
+      postRefs.push(postRef);
+    }
+  
+    return postRefs; // Ritorna l'array di riferimenti ai componenti
   }
   //save post data in DB
   async savePostInDB(url: string, title: string, description: string){

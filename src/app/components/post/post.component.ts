@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, ChangeDetectorRef, OnDestroy, AfterViewInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, ChangeDetectorRef, OnDestroy, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,7 +22,8 @@ import { filter, map, of, switchMap, tap } from 'rxjs';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './post.component.html',
-  styleUrls: ['./post.component.css']  // Corrected from styleUrl to styleUrls
+  styleUrls: ['./post.component.css'],  // Corrected from styleUrl to styleUrls
+  encapsulation: ViewEncapsulation.None  
 })
 export class PostComponent implements OnInit, AfterViewInit {
   @Input() title: string = 'post title';

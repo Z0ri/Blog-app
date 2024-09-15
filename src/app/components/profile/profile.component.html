@@ -6,17 +6,17 @@
 </div>
 
 <div class="info">
-    <div class="post">
+    <div class="post-info">
         <h4>Post</h4>
-        <h4>0</h4>
+        <h4 class="post-counter">{{postCounter}}</h4>
     </div>
-    <div class="follower">
+    <div class="follower-info">
         <h4>Follower</h4>
-        <h4>0</h4>
+        <h4 class="follower-counter">{{followerCounter}}</h4>
     </div>
-    <div class="following">
+    <div class="following-info">
         <h4>Following</h4>
-        <h4>0</h4>
+        <h4 class="following-counter">{{followingCounter}}</h4>
     </div>
 </div>
 <div class="actions">
@@ -27,8 +27,6 @@
     
 </div>
 
-<div class="posts">
-    <app-post></app-post>
-    <app-post></app-post>
-    <app-post></app-post>
+<div class="profilePosts">
+    <ng-container #profilePosts></ng-container>
 </div>
