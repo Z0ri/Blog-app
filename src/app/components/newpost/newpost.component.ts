@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,6 +21,7 @@ import {
 } from '@angular/material/snack-bar';
 import { PostSavingComponent } from '../snackbar/post-saving/post-saving.component';
 import { firstValueFrom } from 'rxjs';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-newpost',
@@ -41,13 +42,15 @@ import { firstValueFrom } from 'rxjs';
   templateUrl: './newpost.component.html',
   styleUrl: './newpost.component.css'
 })
-export class NewpostComponent implements OnInit{
+export class NewpostComponent implements OnInit,  AfterViewInit{
   private _snackBar = inject(MatSnackBar);
   http: HttpClient = inject(HttpClient)
   selectedImage: string | ArrayBuffer | null = null;
   file: File | null = null;
   newpostForm: FormGroup;
   accountName: string = '';
+  accountImg: string = "account_circle.png";
+  accountImg_element!: HTMLElement;
   title: string = '';
   description: string = '';
   date: Date = new Date();
@@ -60,6 +63,9 @@ export class NewpostComponent implements OnInit{
     private authService: AuthService,
     private firestorageService: FireStorageService,
     private postsService: PostsService,
+    private cookieService: CookieService,
+    private elementRef: ElementRef,
+    private changeDetector: ChangeDetectorRef,
     private router: Router
   ) {
     this.newpostForm = new FormGroup({
@@ -67,9 +73,24 @@ export class NewpostComponent implements OnInit{
     });
   }
 
+  ngAfterViewInit(): void {
+    this.accountImg_element = this.elementRef.nativeElement.querySelector(".account-img");
+  }
+
   async ngOnInit() {
     this.accountName = await firstValueFrom(this.authService.getUsername());
     this.selectedImage = 'no-image.jpg';
+
+    this.postsService.getPostProfilePic(this.cookieService.get('user'))
+    .subscribe({
+      next: (response: any) => {
+        this.accountImg = response.profilePic;
+        console.log(response.profilePic);
+        this.accountImg_element.style.backgroundImage = `url(${this.accountImg})`;
+        this.changeDetector.detectChanges();
+      },
+      error: error => console.error("Error fetching profile picture during post creation: "+error) 
+    })
   }
 
   onSubmit(){

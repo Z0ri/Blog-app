@@ -4,7 +4,6 @@
     align-items: center;
 }
 .account-img {
-    background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
     background-size: cover;
 }
 .left-section, .right-section {
@@ -47,6 +46,7 @@ mat-card img{
 }
 .username{
     font-size: 18px;
+    color: purple;
 }
 
 mat-icon{
