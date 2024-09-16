@@ -38,17 +38,12 @@ export class AppComponent implements OnInit{
   }
   async ngOnInit(){
     //set username variable to current user's username
-    this.username = await firstValueFrom(this.authService.getUsername());
+    this.username = await firstValueFrom(this.authService.getUsername(this.cookieService.get('user')));
     if(this.cookieService.get('user')){
       this.logged = true;
     }else{
       this.logged=false;
     }
   }
-  // signOut(){
-  //   this.authService.signOut();
-  //   this.logged = this.authService.logged;
-  //   console.log(this.logged);
-  // }
   
 }

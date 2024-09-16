@@ -99,7 +99,7 @@ export class PostsService {
   }
   //save post data in DB
   async savePostInDB(url: string, title: string, description: string){
-    this.postAuthor = await firstValueFrom(this.authService.getUsername());
+    this.postAuthor = await firstValueFrom(this.authService.getUsername(this.cookieService.get('user')));
     let today = new Date();
     let date: string = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
 
@@ -219,6 +219,16 @@ export class PostsService {
       return of({})
     }
   }
+
+  checkAuthor(authorId: string): boolean{
+    if(authorId == this.cookieService.get('user')){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+
   getLikedPosts(): Observable<any>{
     return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/likedPosts.json`);
   }

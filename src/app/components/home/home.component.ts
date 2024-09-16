@@ -29,32 +29,36 @@ export class HomeComponent implements OnInit, AfterViewInit{
   }
 
   ngOnInit(): void {
-    this.postsService.saveReactions('likedPosts').subscribe({
-      next: (response) => console.log("Liked posts successfully saved: ", response),
-      error: (error) => console.error("Error saving liked posts: ", error)
-    });
+    this.postsService.saveReactions('likedPosts').subscribe();
+    // {
+    //   next: (response) => console.log("Liked posts successfully saved: ", response),
+    //   error: (error) => console.error("Error saving liked posts: ", error)
+    // }
 
-    this.postsService.saveReactions('dislikedPosts').subscribe({
-      next: (response) => console.log("Disliked posts successfully saved: ", response),
-      error: (error) => console.error("Error saving disliked posts: ", error)
-    });
+    this.postsService.saveReactions('dislikedPosts').subscribe();
+    // {
+    //   next: (response) => console.log("Disliked posts successfully saved: ", response),
+    //   error: (error) => console.error("Error saving disliked posts: ", error)
+    // }
     
     //Save likes/dislikes when route changes
     this.router.events
     .pipe(filter(event => event instanceof NavigationEnd))
     .subscribe(() => {
-      this.postsService.saveReactions('likedPosts').subscribe({
-        next: (response) => {
-          console.log("Liked posts successfully saved: ", response);
-        },
-        error: (error) => console.error("Error saving liked posts: ", error)
-      });
-      this.postsService.saveReactions('dislikedPosts').subscribe({
-        next: (response) => {
-          console.log("Disliked posts successfully saved: ", response)
-        },
-        error: (error) => console.error("Error saving disliked posts: ", error)
-      });
+      this.postsService.saveReactions('likedPosts').subscribe();
+      // {
+      //   next: (response) => {
+      //     console.log("Liked posts successfully saved: ", response);
+      //   },
+      //   error: (error) => console.error("Error saving liked posts: ", error)
+      // }
+      this.postsService.saveReactions('dislikedPosts').subscribe();
+      // {
+      //   next: (response) => {
+      //     console.log("Disliked posts successfully saved: ", response)
+      //   },
+      //   error: (error) => console.error("Error saving disliked posts: ", error)
+      // }
     });
   }
 

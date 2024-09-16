@@ -61,7 +61,7 @@ export class PostComponent implements OnInit, AfterViewInit {
     private elementRef: ElementRef,
     private changeDetector: ChangeDetectorRef,
     private cookieService: CookieService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngAfterViewInit(): void {
@@ -88,7 +88,7 @@ export class PostComponent implements OnInit, AfterViewInit {
       this.saveDislikes();
     })
 
-    
+    //save likes and dislikes
     this.saveLikes();
     this.saveDislikes();
 
@@ -123,33 +123,40 @@ export class PostComponent implements OnInit, AfterViewInit {
     this.cookieService.delete(`like-${this.postId}`);
     this.cookieService.delete(`dislike-${this.postId}`);
   }
-    //save likes in DB
-    saveLikes() {
-      const savedLikes = localStorage.getItem(`like-${this.postId}`);
-  
-      this.postsService.saveLikes(this.authorId, this.postId, parseInt(savedLikes || "0", 10))
-      .subscribe(()=>{
-        //get likes
-        this.postsService.getLikes(this.authorId, this.postId).subscribe((response: any)=>{
-          this.likes = Number(response);
-          this.changeDetector.detectChanges();
-        });
-      })
-    }
-  
-    //save dislikes in DB
-    saveDislikes(){
-      const savedDislikes = localStorage.getItem(`dislike-${this.postId}`);
-  
-      this.postsService.saveDislikes(this.authorId, this.postId, parseInt(savedDislikes || "0", 10))
-      .subscribe(()=>{
-        //get dilikes
-        this.postsService.getDislikes(this.authorId, this.postId).subscribe((response: any)=>{
-          this.dislikes = Number(response);
-          this.changeDetector.detectChanges();
-        });
-      })
-    }
+
+  seeProfile(){
+    this.cookieService.set('userProfile', this.authorId);
+    this.router.navigate(['/profile']);
+  }
+
+
+  //save likes in DB
+  saveLikes() {
+    const savedLikes = localStorage.getItem(`like-${this.postId}`);
+
+    this.postsService.saveLikes(this.authorId, this.postId, parseInt(savedLikes || "0", 10))
+    .subscribe(()=>{
+      //get likes
+      this.postsService.getLikes(this.authorId, this.postId).subscribe((response: any)=>{
+        this.likes = Number(response);
+        this.changeDetector.detectChanges();
+      });
+    })
+  }
+
+  //save dislikes in DB
+  saveDislikes(){
+    const savedDislikes = localStorage.getItem(`dislike-${this.postId}`);
+
+    this.postsService.saveDislikes(this.authorId, this.postId, parseInt(savedDislikes || "0", 10))
+    .subscribe(()=>{
+      //get dilikes
+      this.postsService.getDislikes(this.authorId, this.postId).subscribe((response: any)=>{
+        this.dislikes = Number(response);
+        this.changeDetector.detectChanges();
+      });
+    })
+  }
 
   handleReaction(action: 'like' | 'dislike') {
     if (this.logged && this.authorId != this.cookieService.get('user')) {
@@ -230,7 +237,7 @@ export class PostComponent implements OnInit, AfterViewInit {
         }
         this.changeDetector.detectChanges();
       }, 2000);
-    } else if(this.authorId == this.cookieService.get('user')){
+    } else if(this.postsService.checkAuthor(this.authorId)){
       this.isAuthor = true;
       setTimeout(() => {
         this.isAuthor = false;
@@ -238,6 +245,7 @@ export class PostComponent implements OnInit, AfterViewInit {
       }, 2000);
     }
   }
+  
 
   comment() {
     console.log(`localstorage('likedPosts'): ${localStorage.getItem(`like-${this.postId}`)}`);

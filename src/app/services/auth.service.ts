@@ -35,18 +35,18 @@ export class AuthService{
   getUser(userId: string) {
     return this.http.get(`https://blog-app-85fe3-default-rtdb.firebaseio.com/users/${userId}.json`);
   }
-  getUsername(): Observable<string> {
-    return this.http.get<string>(`${this.getDatabaseURL()}/users/${this.cookieService.get('user')}/username.json`);
+  getUsername(userId: string): Observable<string> {
+    return this.http.get<string>(`${this.getDatabaseURL()}/users/${userId}/username.json`);
   }
   getDatabaseURL(){
     return `https://blog-app-85fe3-default-rtdb.firebaseio.com`;
   }
-  updateProfilePic(url: string): Observable<any>{
+  updateProfilePic(url: string, userId: string): Observable<any>{
     //update profile pic
-    return this.http.patch(`${this.getDatabaseURL()}/users/${this.cookieService.get('user')}.json`, {profilePic : url})
+    return this.http.patch(`${this.getDatabaseURL()}/users/${userId}.json`, {profilePic : url})
   }
-  getProfilePic(): Observable<string>{
-    return this.http.get<string>(`${this.getDatabaseURL()}/users/${this.cookieService.get('user')}/profilePic.json`);
+  getProfilePic(userId: string): Observable<string>{
+    return this.http.get<string>(`${this.getDatabaseURL()}/users/${userId}/profilePic.json`);
   }
   checkLogged(): boolean{
     if(this.cookieService.get('user')){

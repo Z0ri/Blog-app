@@ -3,11 +3,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { PostComponent } from "../post/post.component";
 import { AuthService } from '../../services/auth.service';
-import { firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { FireStorageService } from '../../services/fire-storage.service';
 import { PostsService } from '../../services/posts.service';
 import { CookieService } from 'ngx-cookie-service';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
@@ -22,6 +23,7 @@ export class ProfileComponent implements OnInit{
 
   proPic: string | ArrayBuffer | null = "account_circle.png";
   uploadPic: File | null = null;
+  userId: string = "";
   accountName: string = "";
   profilePosts: any[] = [];
   postCounter: number = 0;
@@ -33,15 +35,27 @@ export class ProfileComponent implements OnInit{
     private cookieService: CookieService,
     private fireStorageService: FireStorageService,
     private postsService: PostsService,
-    private changeDetector: ChangeDetectorRef
+    private changeDetector: ChangeDetectorRef,
+    private router: Router
   ){}
   async ngOnInit() {
+    //get user id from router if this is not current user's profile
+    if(this.cookieService.get('userProfile')){
+      this.userId = this.cookieService.get('userProfile');
+    }else{
+      this.userId = this.cookieService.get('user');
+    }
+    this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe(()=>{
+      this.cookieService.delete('userProfile');
+    })
     //get username of the current user
-    this.accountName = await firstValueFrom(this.authService.getUsername());
+    this.accountName = await firstValueFrom(this.authService.getUsername(this.userId));
     //set profile picture
-    this.proPic = await firstValueFrom(this.authService.getProfilePic());
+    this.proPic = await firstValueFrom(this.authService.getProfilePic(this.userId));
     //load posts in the container
-    this.postsService.getUserPosts(this.cookieService.get('user')).subscribe({
+    this.postsService.getUserPosts(this.userId).subscribe({
       next: (response: any) => {
         if(response){
           this.profilePosts = [];
@@ -80,11 +94,16 @@ export class ProfileComponent implements OnInit{
       .then(url => {
         console.log('Profile pictures updated successfully! Download URL:', url);
         //update profile picture in DB
-        this.authService.updateProfilePic(url).subscribe();
+        this.authService.updateProfilePic(url, this.userId).subscribe();
       })
       .catch(error => {
         console.error('Error updating profile picture:', error);
       });
+    }
+  }
+  follow(){
+    if(this.cookieService.get('user') != this.userId){
+      this.followerCounter += 1;
     }
   }
 }

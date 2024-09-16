@@ -1,6 +1,6 @@
 <mat-card class="post" appearance="outlined">
     <mat-card-header>
-      <div mat-card-avatar class="account-img"></div>
+      <div mat-card-avatar class="account-img" (click)="seeProfile()"></div>
       <mat-card-title class="card-title">{{title}}</mat-card-title>
       <mat-card-title class="username">{{author}}</mat-card-title>
       <mat-card-subtitle class="date">{{loadingDate}}</mat-card-subtitle>
