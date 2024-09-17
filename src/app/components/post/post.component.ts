@@ -125,7 +125,7 @@ export class PostComponent implements OnInit, AfterViewInit {
   }
 
   seeProfile(){
-    this.cookieService.set('userProfile', this.authorId);
+    this.cookieService.set('ownerProfile', this.authorId);
     this.router.navigate(['/profile']);
   }
 
@@ -183,7 +183,7 @@ export class PostComponent implements OnInit, AfterViewInit {
             }
             this.disliked = false; // set dislike state to false
         } else { //if like status was true
-          this.likes -= 1; //remove a like
+          this.likes = Math.max(0, this.likes - 1); //remove a like
           console.log(this.likes);
           this.postsService.removeReaction(this.postId, 'like');
           localStorage.setItem(`like-${this.postId}`, this.likes.toString());

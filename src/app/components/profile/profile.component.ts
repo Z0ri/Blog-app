@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, OnInit, viewChild, ViewChild, ViewContainerRef } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, viewChild, ViewChild, ViewContainerRef } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { PostComponent } from "../post/post.component";
@@ -9,6 +9,7 @@ import { FireStorageService } from '../../services/fire-storage.service';
 import { PostsService } from '../../services/posts.service';
 import { CookieService } from 'ngx-cookie-service';
 import { NavigationEnd, Router } from '@angular/router';
+import { ProfileService } from '../../services/profile.service';
 
 @Component({
   selector: 'app-profile',
@@ -17,15 +18,21 @@ import { NavigationEnd, Router } from '@angular/router';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
-export class ProfileComponent implements OnInit{
+export class ProfileComponent implements OnInit, OnDestroy{
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('profilePosts', { read: ViewContainerRef, static: true }) posts!: ViewContainerRef;
 
   proPic: string | ArrayBuffer | null = "account_circle.png";
   uploadPic: File | null = null;
   userId: string = "";
-  accountName: string = "";
+  visitorId: string = "";
   profilePosts: any[] = [];
+  followers: string[] = [];
+  newFollower: string = "";
+
+
+  accountName: string = "";
+  followText = "";
   postCounter: number = 0;
   followerCounter: number = 0;
   followingCounter: number = 0;
@@ -36,19 +43,28 @@ export class ProfileComponent implements OnInit{
     private fireStorageService: FireStorageService,
     private postsService: PostsService,
     private changeDetector: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private profileService: ProfileService
   ){}
+  ngOnDestroy(): void {
+    this.userId = "";
+    this.visitorId = "";
+  }
   async ngOnInit() {
+    this.userId = this.cookieService.get('user');
     //get user id from router if this is not current user's profile
-    if(this.cookieService.get('userProfile')){
-      this.userId = this.cookieService.get('userProfile');
-    }else{
-      this.userId = this.cookieService.get('user');
+    if(this.cookieService.get('ownerProfile') && this.cookieService.get('ownerProfile')!=this.cookieService.get('user')){
+      //means the profile's visitor its owner
+      this.userId = this.cookieService.get('ownerProfile');
+      this.visitorId = this.cookieService.get('user');
     }
+    //on route change
     this.router.events
     .pipe(filter(event => event instanceof NavigationEnd))
     .subscribe(()=>{
-      this.cookieService.delete('userProfile');
+      //delete cookies
+      this.cookieService.delete('visitorId');
+      this.cookieService.delete('ownerProfile');
     })
     //get username of the current user
     this.accountName = await firstValueFrom(this.authService.getUsername(this.userId));
@@ -71,6 +87,41 @@ export class ProfileComponent implements OnInit{
       },
       error: (error: any) => console.error("Error fetching profile's posts: " + error)
     });
+    this.newFollower = this.cookieService.get('newFollower');
+
+    this.profileService.saveFollowers(this.userId, this.newFollower)
+    .subscribe({
+      next: () => {
+        this.profileService.getFollowers(this.userId)
+          .subscribe({
+            next: (response: string[]) => {
+              if(response){
+                this.followerCounter = response.length;
+                this.changeDetector.detectChanges();
+                this.followers = response; //copy of followers in DB
+              }
+            },
+            error: (error) => console.error("Error fetching follower count: " + error)
+          });
+      },
+      error: (error) => {
+        console.error("Error saving followers:", error.message);
+        this.profileService.getFollowers(this.userId)
+          .subscribe({
+            next: (response: string[]) => {
+              this.followerCounter = response.length;
+              this.changeDetector.detectChanges();
+            },
+            error: (error) => console.error("Error fetching follower count: " + error)
+          });
+      }
+    });
+  
+    this.newFollower = ""; //reset new follower
+    this.followText = "Follow"; // *to change with DB*
+    this.changeDetector.detectChanges();
+    //delete cookie
+    this.cookieService.delete('newFollower');
   }
   edit(){
     this.fileInput.nativeElement.click(); //simulate the actual click on the element #fileInput
@@ -101,9 +152,21 @@ export class ProfileComponent implements OnInit{
       });
     }
   }
+  
+  //on follow button click
   follow(){
-    if(this.cookieService.get('user') != this.userId){
+    if(this.newFollower != this.visitorId && !this.followers.includes(this.visitorId)){
       this.followerCounter += 1;
+      this.followText = "Unfollow";
+      this.newFollower = this.visitorId;
+      this.cookieService.set('newFollower', this.newFollower);
+    }else{
+      this.followerCounter -= 1;
+      this.followers = this.followers.filter(id => id!==this.visitorId);
+      this.followText = "Follow";
+      this.newFollower = "";
+      this.cookieService.set('newFollower', this.newFollower);
     }
+    this.changeDetector.detectChanges(); //Ensure view updates
   }
 }
