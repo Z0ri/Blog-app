@@ -21,8 +21,8 @@
 </div>
 <div class="actions">
     <button mat-raised-button class="follow-button" (click)="follow()">{{followText}}</button>
+    <mat-error *ngIf="canFollow">Cannot follow your own profile.</mat-error>
 </div>
-
 <div class="liked-posts">
     
 </div>

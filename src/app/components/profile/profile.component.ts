@@ -10,11 +10,13 @@ import { PostsService } from '../../services/posts.service';
 import { CookieService } from 'ngx-cookie-service';
 import { NavigationEnd, Router } from '@angular/router';
 import { ProfileService } from '../../services/profile.service';
+import { CommonModule } from '@angular/common';
+import { MatError } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [MatButtonModule, MatMenuModule, MatIcon, PostComponent],
+  imports: [CommonModule, MatButtonModule, MatMenuModule, MatIcon, PostComponent, MatError],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -27,6 +29,7 @@ export class ProfileComponent implements OnInit, OnDestroy{
   userId: string = "";
   visitorId: string = "";
   profilePosts: any[] = [];
+  canFollow: boolean = false;
   followers: string[] = [];
   newFollower: string = "";
   removeFollow: boolean = false;
@@ -184,9 +187,11 @@ export class ProfileComponent implements OnInit, OnDestroy{
         this.cookieService.set('newFollower', this.newFollower);
         this.cookieService.set('removedFollower', this.visitorId);
       }
-      this.changeDetector.detectChanges(); //Ensure view updates
     }else{
       // *display error*
+      console.log("can't follow.");
+      this.canFollow = true;
     }
+    this.changeDetector.detectChanges(); //Ensure view updates
   }
 }

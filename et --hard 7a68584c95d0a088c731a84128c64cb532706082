@@ -1,0 +1,40 @@
+[33m35ccbc2[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{0}: reset: moving to 7a68584c95d0a088c731a84128c64cb532706082^
+[33m7a68584[m HEAD@{1}: commit: unfollow added
+[33m35ccbc2[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{2}: commit: following system with no unfollow removal from DB
+[33m66247c4[m HEAD@{3}: commit: profile page loading other user's profiles
+[33m5c0cbb5[m HEAD@{4}: commit: new post style updated
+[33m4fe732a[m HEAD@{5}: commit: Fix post's css in other components
+[33m0b4df21[m HEAD@{6}: commit: stable version like/dislikes without like/dislike removal. After data loss
+[33m484e181[m HEAD@{7}: commit: stable version no like/dislike numbers e other things missing
+[33mc4050f5[m HEAD@{8}: commit: like/dislike system working w no liked/disliked removal
+[33m7acd64f[m HEAD@{9}: commit: like coloring after the first refresh
+[33m95165c3[m HEAD@{10}: commit: efficient like saving
+[33ma9f6ee3[m HEAD@{11}: commit: cookie for likes
+[33m91ac4d7[m HEAD@{12}: commit: progress 'till now
+[33m91513dd[m HEAD@{13}: commit: switch to localstorage for like/dislike system
+[33m52b53fe[m HEAD@{14}: commit: like/dislikes saving when route changes
+[33m0955199[m HEAD@{15}: commit: working like/dislike system
+[33mb3407af[m HEAD@{16}: commit: like/dislike saving on refresh, and UI
+[33m26b82d9[m HEAD@{17}: commit: like update system's beginning
+[33mcac1629[m HEAD@{18}: commit: lil bug fix
+[33mb6e2fb9[m HEAD@{19}: commit: like/dislike system client side
+[33m0c91499[m HEAD@{20}: commit: unlogged like/dislike errors added
+[33m1760bf2[m HEAD@{21}: commit: correct profile pics added to posts
+[33m3227abf[m HEAD@{22}: commit: some little progress
+[33m63cb9b6[m HEAD@{23}: commit: profile component backend progress
+[33mf820e48[m HEAD@{24}: commit: profile front-end
+[33mc06d6d0[m HEAD@{25}: commit: updates
+[33m96424d9[m HEAD@{26}: commit: date attribute added to post model
+[33mdeb7d98[m HEAD@{27}: commit: Basic post creation in home page
+[33m1acc2f3[m HEAD@{28}: commit: post saving snackbar
+[33m7703b67[m HEAD@{29}: commit: post saving in DB
+[33mdd4727c[m HEAD@{30}: commit: image uploading in fireStorage
+[33m97d176e[m HEAD@{31}: commit: logout & some other progress
+[33m2cb400f[m HEAD@{32}: commit: new post css
+[33mc0516fa[m HEAD@{33}: commit: new post front-end with working image preview
+[33mc35142e[m HEAD@{34}: commit: some progress, css and some image uplod tries
+[33m3162da8[m HEAD@{35}: commit: some css
+[33m12cbb5b[m HEAD@{36}: reset: moving to origin/main
+[33m12cbb5b[m HEAD@{37}: commit: switch to realtime DB, and login/signup system
+[33ma626f5d[m HEAD@{38}: Branch: renamed refs/heads/master to refs/heads/main
+[33ma626f5d[m HEAD@{40}: commit (initial): initial commit
