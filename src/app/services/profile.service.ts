@@ -16,26 +16,25 @@ export class ProfileService {
   getFollowers(userId: string): Observable<any>{
     return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${userId}/followers.json`);
   }
-  saveFollowers(userId: string, newFollower: string): Observable<any> {
+  //save followers in DB
+  saveFollowers(userId: string, newFollower: string, remove: boolean): Observable<any> {
     return this.getFollowers(userId).pipe(
       switchMap((response: string[]) => {
-        if (response) {
-          if(!response.includes(newFollower)){
-            if (newFollower !== "") {
-              let followers = [...response];
-              followers.push(newFollower);
-              return this.http.patch(`${this.authService.getDatabaseURL()}/users/${userId}.json`, { followers: followers });
-            } else {
-              return of("No new follower.");
-            }
-          } else {
-            return of("Already followed.");
-          }
-        }else{
-          let followers = newFollower ? [newFollower] : [];
+        let followers = response ? [...response] : [];
+  
+        if (remove) {
+          followers = followers.filter(follower => follower !== newFollower);
+        } else if (newFollower && !followers.includes(newFollower)) {
+          followers.push(newFollower);
+        }
+  
+        if (followers.length !== response?.length) {
           return this.http.patch(`${this.authService.getDatabaseURL()}/users/${userId}.json`, { followers: followers });
+        } else {
+          return of("No followers updates.");
         }
       })
     );
   }
+  
 }

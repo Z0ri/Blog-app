@@ -29,7 +29,7 @@ export class ProfileComponent implements OnInit, OnDestroy{
   profilePosts: any[] = [];
   followers: string[] = [];
   newFollower: string = "";
-
+  removeFollow: boolean = false;
 
   accountName: string = "";
   followText = "";
@@ -87,9 +87,16 @@ export class ProfileComponent implements OnInit, OnDestroy{
       },
       error: (error: any) => console.error("Error fetching profile's posts: " + error)
     });
-    this.newFollower = this.cookieService.get('newFollower');
 
-    this.profileService.saveFollowers(this.userId, this.newFollower)
+    if(this.cookieService.get('removedFollower')){
+      this.newFollower = this.cookieService.get('removedFollower');
+      this.removeFollow = true;
+    }else{
+      this.newFollower = this.cookieService.get('newFollower')
+      this.removeFollow = false;
+    }
+
+    this.profileService.saveFollowers(this.userId, this.newFollower, this.removeFollow)
     .subscribe({
       next: () => {
         this.profileService.getFollowers(this.userId)
@@ -99,6 +106,11 @@ export class ProfileComponent implements OnInit, OnDestroy{
                 this.followerCounter = response.length;
                 this.changeDetector.detectChanges();
                 this.followers = response; //copy of followers in DB
+                //check if visitor is a follower
+                if(this.followers.includes(this.visitorId)){
+                  this.followText = "Unfollow";
+                  this.changeDetector.detectChanges();
+                }
               }
             },
             error: (error) => console.error("Error fetching follower count: " + error)
@@ -122,6 +134,7 @@ export class ProfileComponent implements OnInit, OnDestroy{
     this.changeDetector.detectChanges();
     //delete cookie
     this.cookieService.delete('newFollower');
+    this.cookieService.delete("removedFollower");
   }
   edit(){
     this.fileInput.nativeElement.click(); //simulate the actual click on the element #fileInput
@@ -155,18 +168,25 @@ export class ProfileComponent implements OnInit, OnDestroy{
   
   //on follow button click
   follow(){
-    if(this.newFollower != this.visitorId && !this.followers.includes(this.visitorId)){
-      this.followerCounter += 1;
-      this.followText = "Unfollow";
-      this.newFollower = this.visitorId;
-      this.cookieService.set('newFollower', this.newFollower);
+    if(this.userId != this.cookieService.get('user')){
+      if(!this.followers.includes(this.visitorId)){
+        this.followerCounter += 1;
+        this.followText = "Unfollow";
+        this.newFollower = this.visitorId;
+        this.followers.push(this.visitorId);
+        this.cookieService.set('newFollower', this.newFollower);
+        this.cookieService.delete('removedFollower');
+      }else{
+        this.followerCounter -= 1;
+        this.followers = this.followers.filter(id => id!==this.visitorId);
+        this.followText = "Follow";
+        this.newFollower = "";
+        this.cookieService.set('newFollower', this.newFollower);
+        this.cookieService.set('removedFollower', this.visitorId);
+      }
+      this.changeDetector.detectChanges(); //Ensure view updates
     }else{
-      this.followerCounter -= 1;
-      this.followers = this.followers.filter(id => id!==this.visitorId);
-      this.followText = "Follow";
-      this.newFollower = "";
-      this.cookieService.set('newFollower', this.newFollower);
+      // *display error*
     }
-    this.changeDetector.detectChanges(); //Ensure view updates
   }
 }
