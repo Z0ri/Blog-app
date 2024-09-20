@@ -1,5 +1,6 @@
-<mat-drawer-container class="example-container" autosize>
-    <mat-drawer mode="side" opened>     
+<mat-drawer-container class="side-menu" autosize>
+    <!-- side menu -->
+    <mat-drawer class="side-menu" mode="side" opened>     
         <div class="drawer-header">
             <a routerLink="/"><img class="logo" src="https://media.istockphoto.com/id/1208174000/vector/people-talking-icon-in-flat-style-isolated-for-your-design-logo-vector-illustration.jpg?s=612x612&w=0&k=20&c=ZRezVbW1WfAYizGlAI4qPAp2AX6xNQxyubIWwyq4Ccc=" alt="logo"></a>
             <h4 class="drawer-title">Blog</h4>
@@ -11,14 +12,31 @@
             <button mat-button routerLink="search"><mat-icon>search</mat-icon>Search</button>
             <button mat-button routerLink="profile" *ngIf="logged"><mat-icon>account_circle</mat-icon>{{username}}</button>
             <button mat-button routerLink="new-post" *ngIf="logged"><mat-icon>add_circle</mat-icon>Create new post</button>
-        
             <div class="settingsBtn-container">
                 <button mat-button routerLink="settings" class="settings-btn"><mat-icon>settings</mat-icon>Settings</button>
             </div>
         </div>        
     </mat-drawer>
+
+    <!-- main content -->
     <mat-drawer-content>
         <router-outlet></router-outlet>
     </mat-drawer-content>
+
+    <mat-drawer class="comments-section" #commentsSection class="example-sidenav" mode="side" position="end">
+        <div class="commentInput-container">
+          <form #commentForm="ngForm" (ngSubmit)="comment(commentForm)">
+            <mat-form-field appearance="fill" class="comment-input">
+              <mat-label>Comment here...</mat-label>
+              <input matInput name="comment" required>
+            </mat-form-field>
+            <button mat-raised-button color="primary" class="comment-btn" type="submit" [disabled]="!commentForm.valid">
+              Publish
+            </button>
+          </form>
+        </div>
+    </mat-drawer>
 </mat-drawer-container>
+
+  
   

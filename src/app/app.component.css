@@ -1,10 +1,34 @@
-.example-container {
+.side-menu {
     width: auto;
     height: 100%;
 }
-mat-drawer{
-    width: 250px;
+
+.commentInput-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 100%;
+    height: 100%;
 }
+
+form {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+form .comment-input {
+    flex: 1;
+    margin-right: 8px;
+}
+
+form .comment-btn {
+    width: 80px;
+    height: 50px;
+}
+
+
 mat-drawer-content{
     background-color: rgb(53, 53, 53);
 }

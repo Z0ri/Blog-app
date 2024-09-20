@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { CookieService } from 'ngx-cookie-service';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, of, switchMap, tap } from 'rxjs';
+import { CommentsService } from '../../services/comments.service';
 
 @Component({
   selector: 'app-post',
@@ -58,6 +59,7 @@ export class PostComponent implements OnInit, AfterViewInit {
   constructor(
     private authService: AuthService,
     private postsService: PostsService,
+    private commentsService: CommentsService,
     private elementRef: ElementRef,
     private changeDetector: ChangeDetectorRef,
     private cookieService: CookieService,
@@ -248,11 +250,8 @@ export class PostComponent implements OnInit, AfterViewInit {
   
 
   comment() {
-    console.log(`localstorage('likedPosts'): ${localStorage.getItem(`like-${this.postId}`)}`);
-    console.log(`localstorage('dislikedPosts'): ${localStorage.getItem(`dislike-${this.postId}`)}`);
     if (this.logged) {
       this.canComment = true;
-      this.postsService.comment();
     } else {
       this.canComment = false;
       setTimeout(() => {
@@ -260,5 +259,6 @@ export class PostComponent implements OnInit, AfterViewInit {
         this.changeDetector.detectChanges();
       }, 2000);
     }
+    this.commentsService.openCommentsSection.next(this.postId);
   }
 }
