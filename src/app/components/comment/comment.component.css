@@ -1,0 +1,30 @@
+.comment-container{
+    width: 250px;
+    height: auto;
+    border-radius: 10px;
+    background-color: rgb(111, 104, 104);
+    padding: 2px;
+}
+.comment-header{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.comment-content{
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    padding: 5px;
+}
+.account-name{
+    font-size: 20px;
+    margin-top: 2vh;
+}
+.account-img{
+    background-image: url('/account_circle.png');
+    background-size: cover;
+    background-position: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    float: left;
+}

@@ -6,6 +6,7 @@
     margin-bottom: 20px;
 }
 .account-img {
+    background-image: url('/account_circle.png');
     background-size: cover;
     background-position: center;
     width: 50px;

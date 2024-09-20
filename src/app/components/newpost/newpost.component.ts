@@ -78,7 +78,9 @@ export class NewpostComponent implements OnInit,  AfterViewInit{
   }
 
   async ngOnInit() {
-    this.accountName = await firstValueFrom(this.authService.getUsername(this.cookieService.get('user')));
+    const username = await firstValueFrom(this.authService.getUsername(this.cookieService.get('user')));
+    this.accountName = username || "";
+    
     this.selectedImage = 'no-image.jpg';
 
     this.postsService.getPostProfilePic(this.cookieService.get('user'))

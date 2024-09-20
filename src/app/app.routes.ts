@@ -6,6 +6,7 @@ import { NewpostComponent } from './components/newpost/newpost.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { ExploreComponent } from './components/explore/explore.component';
+import { CommentComponent } from './components/comment/comment.component';
 
 export const routes: Routes = [
     {path: '', component: HomeComponent},
@@ -14,5 +15,5 @@ export const routes: Routes = [
     {path:'new-post', component:NewpostComponent},
     {path:'profile', component: ProfileComponent},
     {path:'explore', component: ExploreComponent},
-    {path:'settings', component: SettingsComponent}
+    {path:'settings', component: SettingsComponent},
 ];

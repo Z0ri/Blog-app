@@ -259,6 +259,6 @@ export class PostComponent implements OnInit, AfterViewInit {
         this.changeDetector.detectChanges();
       }, 2000);
     }
-    this.commentsService.openCommentsSection.next(this.postId);
+    this.commentsService.openCommentsSection.next([this.postId, this.author]);
   }
 }
