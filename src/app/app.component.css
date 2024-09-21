@@ -20,7 +20,7 @@ form {
 
 form .comment-input {
     flex: 1;
-    margin-right: 8px;
+    margin-right: 10px;
 }
 
 form .comment-btn {
@@ -29,7 +29,7 @@ form .comment-btn {
 }
 
 .comments{
-    padding-right: 10px;
+    padding-right: 15px;
     padding-top: 20px;
     float: right;
 }

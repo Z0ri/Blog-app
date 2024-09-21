@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { CommentsService } from '../../services/comments.service';
 
 @Component({
@@ -8,17 +8,25 @@ import { CommentsService } from '../../services/comments.service';
   templateUrl: './comment.component.html',
   styleUrl: './comment.component.css'
 })
-export class CommentComponent {
+export class CommentComponent implements AfterViewInit{
+  @ViewChild('profilePicture') profilePictureEl!: ElementRef;
+  @Input() authorId: string = "";
   @Input() username: string = "";
   @Input() content: string = "";
-
-  postId: string = "";
+  @Input() profilePic: string = "";
 
 
 
   constructor(
-    private commentsService: CommentsService
+    private commentsService: CommentsService,
+    private changeDetector: ChangeDetectorRef
   ){}
+
+
+  ngAfterViewInit(): void {
+    this.profilePictureEl.nativeElement.style.backgroundImage = `url(${this.profilePic})`;
+    this.changeDetector.detectChanges();
+  }
 
 
 

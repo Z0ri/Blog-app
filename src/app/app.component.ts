@@ -68,7 +68,7 @@ export class AppComponent implements OnInit{
       this.logged=false;
     }
     //subscribe to observable to open comments section
-    this.commentsService.openCommentsSection
+    this.commentsService.openCommentsSection$
     .pipe(skip(1))
     .subscribe({
       next: (postInfo: string[]) => {
@@ -116,18 +116,34 @@ export class AppComponent implements OnInit{
 
 
 
-  publishComment(form: NgForm){
+  publishComment(form: NgForm) {
     const commentContent = form.value.comment;
-    this.commentsService.publish(new Comment(this.CommentPostId, this.cookieService.get('user'), this.username, commentContent), this.PostAuthorId)
-    .subscribe({
-      next: ((response: any) => {
-        console.log(`Comment successfully published: ${response}`);
-        this.comments = this.commentsService.comments; //get array of comments from comments service
-      }),
-      error: ((error: any) => {
-        console.error(`Error publishing comment: ${error.value}`)
-      })
-    })
+    const authorId = this.cookieService.get('user');
+  
+    // Retrieve the profile picture using the authorId
+    this.authService.getProfilePic(authorId).subscribe({
+      next: (profilePic: string) => {
+        // Create a new Comment instance with the profile picture
+        const newComment = new Comment(this.CommentPostId, authorId, profilePic, this.username, commentContent);
+        
+        this.commentsService.publish(newComment, this.PostAuthorId)
+        .subscribe({
+          next: (response: any) => {
+            console.log(`Comment successfully published: ${response}`);
+            this.comments = this.commentsService.comments; // Get array of comments from comments service
+            this.commentsService.updateComments$.next(this.CommentPostId); // Update comments UI
+          },
+          error: (error: any) => {
+            console.error(`Error publishing comment: ${error.value}`);
+          }
+        });
+      },
+      error: (error: any) => {
+        console.error(`Error retrieving profile picture: ${error}`);
+      }
+    });
+  
     form.reset();
   }
+  
 }

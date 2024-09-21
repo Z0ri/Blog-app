@@ -20,7 +20,7 @@
         <p class="dislikes">{{dislikes}}</p>
         <mat-error *ngIf="!canDislike">Sign up to dislike.</mat-error>
         <a (click)="comment()" class="comment-btn"><mat-icon>comment</mat-icon></a>
-        <p class="comments">0</p>
+        <p class="comments">{{comments}}</p>
         <mat-error *ngIf="!canComment">Sign up to comment.</mat-error>
       </mat-card-actions>
     </div>

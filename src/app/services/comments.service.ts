@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, switchMap } from 'rxjs';
 import { Comment } from '../models/comment';
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
@@ -13,8 +13,9 @@ import { error } from 'console';
 export class CommentsService {
   http: HttpClient = inject(HttpClient);
   comments: Comment[] = [];
-  openCommentsSection: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
-  
+  openCommentsSection$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+  updateComments$: BehaviorSubject<string> = new BehaviorSubject<string>("");
+
   constructor(
     private authService: AuthService,
     private cookieService: CookieService

@@ -2,8 +2,8 @@
     width: 250px;
     height: auto;
     border-radius: 10px;
-    background-color: rgb(111, 104, 104);
-    padding: 2px;
+    border: 2px solid gray;
+    padding: 10px;
 }
 .comment-header{
     display: flex;
@@ -18,6 +18,7 @@
 .account-name{
     font-size: 20px;
     margin-top: 2vh;
+    margin-left: 10px;
 }
 .account-img{
     background-image: url('/account_circle.png');
@@ -25,6 +26,7 @@
     background-position: center;
     width: 40px;
     height: 40px;
+    border-radius: 50%;
     cursor: pointer;
     float: left;
 }

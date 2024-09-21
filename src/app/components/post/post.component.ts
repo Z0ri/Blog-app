@@ -42,6 +42,7 @@ export class PostComponent implements OnInit, AfterViewInit {
   today: Date = new Date();
   loadingDate: string = `${this.today.getDate()}/${this.today.getMonth() + 1}/${this.today.getFullYear()}`;
   
+  comments: number = 0; //comments counter
   likes: number = 0; //likes counter
   dislikes: number = 0; //dislikes counter
 
@@ -119,6 +120,23 @@ export class PostComponent implements OnInit, AfterViewInit {
         this.changeDetector.detectChanges(); // Ensure view updates
       }
     });
+
+    //load number of likes
+    this.commentsService.getComments(this.postId, this.authorId)
+    .subscribe((comments: string[])=>{
+      if(comments){
+        this.comments = comments.length;
+        this.changeDetector.detectChanges();
+      }
+    })
+
+    this.commentsService.updateComments$
+    .subscribe((commentPostId: string)=>{
+      if(commentPostId == this.postId){
+        this.comments+=1;
+        this.changeDetector.detectChanges();
+      }
+    })
     
     localStorage.removeItem(`like-${this.postId}`);
     localStorage.removeItem(`dislike-${this.postId}`);
@@ -259,6 +277,6 @@ export class PostComponent implements OnInit, AfterViewInit {
         this.changeDetector.detectChanges();
       }, 2000);
     }
-    this.commentsService.openCommentsSection.next([this.postId, this.authorId]);
+    this.commentsService.openCommentsSection$.next([this.postId, this.authorId]);
   }
 }
