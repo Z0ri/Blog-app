@@ -29,6 +29,7 @@ export class CommentsService {
   }
 
   publish(newComment: Comment, postAuthorId: string): Observable<any> {
+    this.comments = [];
     return this.getComments(newComment.postId, postAuthorId)
       .pipe(
         switchMap((comments: Comment[] = []) => { //add a default value to the array in case it is null or undefined
@@ -36,11 +37,10 @@ export class CommentsService {
           if (!Array.isArray(comments)) {
             comments = [];
           }
-  
-          // Add the new comment to the existing comments array
-          comments.push(newComment);
-          // Add the new comment to the property comments array to allow UI update
-          this.comments.push(newComment);
+          
+          
+          comments.push(newComment); // Add the new comment to the existing comments array
+          this.comments = comments; //Set comments array property to fetched comments to update UI
 
           // Update comments in DB
           return this.http.patch(`${this.authService.getDatabaseURL()}/users/${postAuthorId}/posts/${newComment.postId}.json`, { comments });

@@ -72,16 +72,35 @@ export class AppComponent implements OnInit{
     .pipe(skip(1))
     .subscribe({
       next: (postInfo: string[]) => {
-        this.CommentPostId = postInfo[0]; //get comment's post id
-        this.PostAuthorId = postInfo[1]; //get comment's post id
-        console.log("comment post id: " + this.CommentPostId);
-        console.log("post author id: " + this.PostAuthorId);
-        this.commentsSection.toggle(); // open comments section
-        this.IscommentsSectionOpen = !this.IscommentsSectionOpen; //set comment section's status to 'open'
-        this.comments = this.commentsService.comments; //get array of comments from comments service
+        const newPostId = postInfo[0];
+        const newPostAuthorId = postInfo[1];
+    
+        if (this.IscommentsSectionOpen) {
+          if (this.CommentPostId === newPostId) {
+            this.commentsSection.toggle();
+            this.IscommentsSectionOpen = false;
+            this.comments = [];
+          } else {
+            this.CommentPostId = newPostId;
+            this.PostAuthorId = newPostAuthorId;
+          }
+        } else {
+          this.commentsSection.toggle();
+          this.IscommentsSectionOpen = true;
+          this.CommentPostId = newPostId;
+          this.PostAuthorId = newPostAuthorId;
+        }
+    
+        this.commentsService.getComments(this.CommentPostId, this.PostAuthorId).subscribe({
+          next: (comments: Comment[]) => {
+            this.comments = comments || [];
+          },
+          error: (error) => console.error("Error fetching comments: " + error)
+        });
       },
       error: (error) => console.error("Error opening comments section: " + error)
     });
+    
     //subscribe to observable to close comments section when route changes
     this.router.events
     .pipe(
@@ -93,18 +112,20 @@ export class AppComponent implements OnInit{
       }
     });
   }
-  publish(form: NgForm){
+
+
+
+
+  publishComment(form: NgForm){
     const commentContent = form.value.comment;
     this.commentsService.publish(new Comment(this.CommentPostId, this.cookieService.get('user'), this.username, commentContent), this.PostAuthorId)
     .subscribe({
       next: ((response: any) => {
         console.log(`Comment successfully published: ${response}`);
         this.comments = this.commentsService.comments; //get array of comments from comments service
-        console.log(this.commentsService.comments);
       }),
       error: ((error: any) => {
         console.error(`Error publishing comment: ${error.value}`)
-        console.log(this.commentsService.comments);
       })
     })
     form.reset();
