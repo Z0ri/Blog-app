@@ -29,7 +29,7 @@ export class PostsService {
   constructor(private authService: AuthService, private cookieService: CookieService) { }
 
   //fetch every posts in the DB
-  getAllPosts(): any {
+  getAllPosts(): any[] {
     this.authService.getUsers().subscribe({
       next: (response) => {
         let allUsers: any = response;
@@ -228,6 +228,14 @@ export class PostsService {
     }
   }
 
+  getPostAuthor(postId: string): string{
+    for(let id of this.allPosts){
+      if(id == postId){
+        return id;
+      }
+    }
+    return "";
+  }
 
   getLikedPosts(): Observable<any>{
     return this.http.get<string[]>(`${this.authService.getDatabaseURL()}/users/${this.cookieService.get('user')}/likedPosts.json`);

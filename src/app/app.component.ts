@@ -43,8 +43,8 @@ export class AppComponent implements OnInit{
   @ViewChild('commentsSection') commentsSection!: MatDrawer;
   commentForm!: FormGroup;
   comments: Comment[] = [];
-  author: string = "";
-  postId: string = "";
+  CommentPostId: string = "";
+  PostAuthorId: string = "";
   IscommentsSectionOpen = false;
 
   title = 'blog-app';
@@ -55,6 +55,7 @@ export class AppComponent implements OnInit{
     private cookieService: CookieService,
     private authService: AuthService,
     private commentsService: CommentsService,
+    private postsService: PostsService,
     private router: Router
   ){
   }
@@ -70,9 +71,11 @@ export class AppComponent implements OnInit{
     this.commentsService.openCommentsSection
     .pipe(skip(1))
     .subscribe({
-      next: (postCredentials: string[]) => {
-        this.postId = postCredentials[0]; //get comment's post id
-        this.author = postCredentials[1]; //get comment's post's author id
+      next: (postInfo: string[]) => {
+        this.CommentPostId = postInfo[0]; //get comment's post id
+        this.PostAuthorId = postInfo[1]; //get comment's post id
+        console.log("comment post id: " + this.CommentPostId);
+        console.log("post author id: " + this.PostAuthorId);
         this.commentsSection.toggle(); // open comments section
         this.IscommentsSectionOpen = !this.IscommentsSectionOpen; //set comment section's status to 'open'
         this.comments = this.commentsService.comments; //get array of comments from comments service
@@ -91,10 +94,19 @@ export class AppComponent implements OnInit{
     });
   }
   publish(form: NgForm){
-    const commentValue = form.value; // Access the input value
-    console.log('Comment:', commentValue);
-    this.commentsService.publish(new Comment(this.postId, this.author, form.value.comment)); //publish comment 
-    this.comments = this.commentsService.comments; //get array of comments from comments service
+    const commentContent = form.value.comment;
+    this.commentsService.publish(new Comment(this.CommentPostId, this.cookieService.get('user'), this.username, commentContent), this.PostAuthorId)
+    .subscribe({
+      next: ((response: any) => {
+        console.log(`Comment successfully published: ${response}`);
+        this.comments = this.commentsService.comments; //get array of comments from comments service
+        console.log(this.commentsService.comments);
+      }),
+      error: ((error: any) => {
+        console.error(`Error publishing comment: ${error.value}`)
+        console.log(this.commentsService.comments);
+      })
+    })
     form.reset();
   }
 }

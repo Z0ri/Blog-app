@@ -8,7 +8,6 @@ import { CookieService } from 'ngx-cookie-service';
 })
 export class AuthService{
   private http: HttpClient = inject(HttpClient);
-  public username: string = '';
   constructor(private cookieService: CookieService) { }
 
   signUp(newUser: User): Observable<Object>{
