@@ -1,5 +1,8 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { CommentsService } from '../../services/comments.service';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-comment',
@@ -19,7 +22,10 @@ export class CommentComponent implements AfterViewInit{
 
   constructor(
     private commentsService: CommentsService,
-    private changeDetector: ChangeDetectorRef
+    private changeDetector: ChangeDetectorRef,
+    private authService: AuthService,
+    private cookieService: CookieService,
+    private router: Router
   ){}
 
 
