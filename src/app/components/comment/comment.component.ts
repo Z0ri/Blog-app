@@ -1,6 +1,8 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { CommentsService } from '../../services/comments.service';
 import { AuthService } from '../../services/auth.service';
+import { CookieService } from 'ngx-cookie-service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-comment',
@@ -19,8 +21,9 @@ export class CommentComponent implements AfterViewInit{
 
 
   constructor(
-    private commentsService: CommentsService,
     private authService: AuthService,
+    private cookieService: CookieService,
+    private router: Router,
     private changeDetector: ChangeDetectorRef
   ){}
 
@@ -41,6 +44,7 @@ export class CommentComponent implements AfterViewInit{
 
   seeProfile(){
     //see profile
-    console.log(`Viewing profile for: ${this.username}`);
+    this.cookieService.set('ownerProfile', this.authorId);
+    this.router.navigate(['/profile']);
   }
 }
