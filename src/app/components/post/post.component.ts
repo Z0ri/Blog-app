@@ -123,7 +123,7 @@ export class PostComponent implements OnInit, AfterViewInit {
 
     //load number of likes
     this.commentsService.getComments(this.postId, this.authorId)
-    .subscribe((comments: string[])=>{
+    .subscribe((comments: Comment[])=>{
       if(comments){
         this.comments = comments.length;
         this.changeDetector.detectChanges();
