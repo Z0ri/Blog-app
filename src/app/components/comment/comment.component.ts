@@ -1,5 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { CommentsService } from '../../services/comments.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-comment',
@@ -10,22 +11,30 @@ import { CommentsService } from '../../services/comments.service';
 })
 export class CommentComponent implements AfterViewInit{
   @ViewChild('profilePicture') profilePictureEl!: ElementRef;
-  @Input() authorId: string = "";
-  @Input() username: string = "";
-  @Input() content: string = "";
-  @Input() profilePic: string = "";
+  authorId: string = "";
+  username: string = "";
+  content: string = "";
+  profilePicture: string = "";
 
 
 
   constructor(
     private commentsService: CommentsService,
+    private authService: AuthService,
     private changeDetector: ChangeDetectorRef
   ){}
 
 
   ngAfterViewInit(): void {
-    this.profilePictureEl.nativeElement.style.backgroundImage = `url(${this.profilePic})`;
-    this.changeDetector.detectChanges();
+    this.authService.getProfilePic(this.authorId)
+    .subscribe({
+      next: (profilePic: string)=>{
+        this.profilePicture = profilePic;
+        this.profilePictureEl.nativeElement.style.backgroundImage = `url('${this.profilePicture}')`;
+        this.changeDetector.detectChanges();
+      },
+      error: error => console.error("Error fetching the profile picture: " + error)
+    });
   }
 
 

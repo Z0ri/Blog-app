@@ -28,11 +28,12 @@ form .comment-btn {
     height: 50px;
 }
 
-.comments{
-    padding-right: 15px;
-    padding-top: 20px;
+::ng-deep .comments > * {
+    margin-top: 4vh;
+    margin-right: 10px;
     float: right;
 }
+
 
 
 mat-drawer-content{

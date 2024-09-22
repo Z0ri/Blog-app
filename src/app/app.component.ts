@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
 import { MatButton } from '@angular/material/button';
@@ -40,6 +40,7 @@ import { PostsService } from './services/posts.service';
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit{
+  @ViewChild('comments', { read: ViewContainerRef }) commentsContainer!: ViewContainerRef;
   @ViewChild('commentsSection') commentsSection!: MatDrawer;
   commentForm!: FormGroup;
   comments: Comment[] = [];
@@ -69,37 +70,46 @@ export class AppComponent implements OnInit{
     }
     //subscribe to observable to open comments section
     this.commentsService.openCommentsSection$
-    .pipe(skip(1))
-    .subscribe({
-      next: (postInfo: string[]) => {
-        const newPostId = postInfo[0];
-        const newPostAuthorId = postInfo[1];
-    
-        if (this.IscommentsSectionOpen) {
-          if (this.CommentPostId === newPostId) {
-            this.commentsSection.toggle();
-            this.IscommentsSectionOpen = false;
-            this.comments = [];
-          } else {
-            this.CommentPostId = newPostId;
-            this.PostAuthorId = newPostAuthorId;
-          }
-        } else {
+  .pipe(skip(1))
+  .subscribe({
+    next: (postInfo: string[]) => {
+      const newPostId = postInfo[0];
+      const newPostAuthorId = postInfo[1];
+
+      if (this.IscommentsSectionOpen) {
+        // If comments section is opened & the comment button clicked is of the same post (close)
+        if (this.CommentPostId === newPostId) {
           this.commentsSection.toggle();
-          this.IscommentsSectionOpen = true;
+          this.IscommentsSectionOpen = false;
+          this.comments = [];
+          this.commentsContainer.clear(); // Delete comments from UI
+        } else { // Open
           this.CommentPostId = newPostId;
           this.PostAuthorId = newPostAuthorId;
+          this.commentsContainer.clear(); // Delete comments from UI
+          this.commentsService.createAllComments(this.commentsContainer, this.CommentPostId, this.PostAuthorId);
         }
-    
-        this.commentsService.getComments(this.CommentPostId, this.PostAuthorId).subscribe({
-          next: (comments: Comment[]) => {
-            this.comments = comments || [];
-          },
-          error: (error) => console.error("Error fetching comments: " + error)
-        });
-      },
-      error: (error) => console.error("Error opening comments section: " + error)
-    });
+      } else {
+        // Open
+        this.commentsSection.toggle();
+        this.IscommentsSectionOpen = true;
+        this.CommentPostId = newPostId;
+        this.PostAuthorId = newPostAuthorId;
+        this.commentsService.createAllComments(this.commentsContainer, this.CommentPostId, this.PostAuthorId);
+      }
+
+      // Fetch and update comments
+      this.commentsService.getComments(this.CommentPostId, this.PostAuthorId).subscribe({
+        next: (comments: Comment[]) => {
+          this.comments = comments || [];
+          // Optionally update UI with new comments here if needed
+        },
+        error: (error) => console.error("Error fetching comments: " + error)
+      });
+    },
+    error: (error) => console.error("Error opening comments section: " + error)
+  });
+
     
     //subscribe to observable to close comments section when route changes
     this.router.events
@@ -114,36 +124,21 @@ export class AppComponent implements OnInit{
   }
 
 
-
-
-  publishComment(form: NgForm) {
+  publishComment(form: NgForm){
     const commentContent = form.value.comment;
     const authorId = this.cookieService.get('user');
-  
-    // Retrieve the profile picture using the authorId
-    this.authService.getProfilePic(authorId).subscribe({
-      next: (profilePic: string) => {
-        // Create a new Comment instance with the profile picture
-        const newComment = new Comment(this.CommentPostId, authorId, profilePic, this.username, commentContent);
-        
-        this.commentsService.publish(newComment, this.PostAuthorId)
-        .subscribe({
-          next: (response: any) => {
-            console.log(`Comment successfully published: ${response}`);
-            this.comments = this.commentsService.comments; // Get array of comments from comments service
-            this.commentsService.updateComments$.next(this.CommentPostId); // Update comments UI
-          },
-          error: (error: any) => {
-            console.error(`Error publishing comment: ${error.value}`);
-          }
-        });
+    const newComment = new Comment(this.CommentPostId, authorId, '', this.username, commentContent);
+
+    this.commentsService.publish(newComment, this.PostAuthorId, this.commentsContainer)
+    .subscribe({
+      next: () => {
+        this.commentsService.updateComments$.next(this.CommentPostId);
       },
-      error: (error: any) => {
-        console.error(`Error retrieving profile picture: ${error}`);
-      }
-    });
-  
+      error: error => console.error("Error adding comment: " + error)
+    })
     form.reset();
   }
+
+
   
 }
