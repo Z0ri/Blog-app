@@ -16,7 +16,6 @@ import { CommentsService } from './services/comments.service';
 import { Router } from '@angular/router';
 import { Comment } from './models/comment';
 import { CommentComponent } from "./components/comment/comment.component";
-import { PostsService } from './services/posts.service';
 
 
 @Component({
@@ -47,7 +46,7 @@ export class AppComponent implements OnInit{
   CommentPostId: string = "";
   PostAuthorId: string = "";
   IscommentsSectionOpen = false;
-
+  
   title = 'blog-app';
   logged: boolean = false;
   username: string = '';
@@ -56,7 +55,6 @@ export class AppComponent implements OnInit{
     private cookieService: CookieService,
     private authService: AuthService,
     private commentsService: CommentsService,
-    private postsService: PostsService,
     private router: Router
   ){
   }
@@ -70,33 +68,33 @@ export class AppComponent implements OnInit{
     }
     //subscribe to observable to open comments section
     this.commentsService.openCommentsSection$
-  .pipe(skip(1))
-  .subscribe({
-    next: (postInfo: string[]) => {
-      const newPostId = postInfo[0];
-      const newPostAuthorId = postInfo[1];
+    .pipe(skip(1))
+    .subscribe({
+      next: (postInfo: string[]) => {
+        const newPostId = postInfo[0];
+        const newPostAuthorId = postInfo[1];
 
-      if (this.IscommentsSectionOpen) {
-        // If comments section is opened & the comment button clicked is of the same post (close)
-        if (this.CommentPostId === newPostId) {
+        if (this.IscommentsSectionOpen) {
+          // If comments section is opened & the comment button clicked is of the same post (close)
+          if (this.CommentPostId === newPostId) {
+            this.commentsSection.toggle();
+            this.IscommentsSectionOpen = false;
+            this.comments = [];
+            this.commentsContainer.clear(); // Delete comments from UI
+          } else { // Open
+            this.CommentPostId = newPostId;
+            this.PostAuthorId = newPostAuthorId;
+            this.commentsContainer.clear(); // Delete comments from UI
+            this.commentsService.createAllComments(this.commentsContainer, this.CommentPostId, this.PostAuthorId);
+          }
+        } else {
+          // Open
           this.commentsSection.toggle();
-          this.IscommentsSectionOpen = false;
-          this.comments = [];
-          this.commentsContainer.clear(); // Delete comments from UI
-        } else { // Open
+          this.IscommentsSectionOpen = true;
           this.CommentPostId = newPostId;
           this.PostAuthorId = newPostAuthorId;
-          this.commentsContainer.clear(); // Delete comments from UI
           this.commentsService.createAllComments(this.commentsContainer, this.CommentPostId, this.PostAuthorId);
         }
-      } else {
-        // Open
-        this.commentsSection.toggle();
-        this.IscommentsSectionOpen = true;
-        this.CommentPostId = newPostId;
-        this.PostAuthorId = newPostAuthorId;
-        this.commentsService.createAllComments(this.commentsContainer, this.CommentPostId, this.PostAuthorId);
-      }
 
       // Fetch and update comments
       this.commentsService.getComments(this.CommentPostId, this.PostAuthorId).subscribe({
@@ -106,9 +104,9 @@ export class AppComponent implements OnInit{
         },
         error: (error) => console.error("Error fetching comments: " + error)
       });
-    },
-    error: (error) => console.error("Error opening comments section: " + error)
-  });
+      },
+      error: (error) => console.error("Error opening comments section: " + error)
+    });
 
     
     //subscribe to observable to close comments section when route changes
@@ -125,18 +123,21 @@ export class AppComponent implements OnInit{
 
 
   publishComment(form: NgForm){
-    const commentContent = form.value.comment;
-    const authorId = this.cookieService.get('user');
-    const newComment = new Comment(this.CommentPostId, authorId, '', this.username, commentContent);
-
-    this.commentsService.publish(newComment, this.PostAuthorId, this.commentsContainer)
-    .subscribe({
-      next: () => {
-        this.commentsService.updateComments$.next(this.CommentPostId);
-      },
-      error: error => console.error("Error adding comment: " + error)
-    })
-    form.reset();
+    if(form.value.comment){
+      
+      const commentContent = form.value.comment;
+      const authorId = this.cookieService.get('user');
+      const newComment = new Comment(this.CommentPostId, authorId, '', this.username, commentContent);
+  
+      this.commentsService.publish(newComment, this.PostAuthorId, this.commentsContainer)
+      .subscribe({
+        next: () => {
+          this.commentsService.updateComments$.next(this.CommentPostId);
+        },
+        error: error => console.error("Error adding comment: " + error)
+      })
+      form.reset();
+    }
   }
 
 

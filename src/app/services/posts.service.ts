@@ -124,7 +124,7 @@ export class PostsService {
     .subscribe();
   }
 
-  
+  //add reaction to liked/disliked posts array
   addReaction(postId: string, reactionName: "like" | "dislike"){
     if(reactionName == "like"){
       this.likedPosts.push(postId);
@@ -149,13 +149,12 @@ export class PostsService {
     }
   }
 
-  //save likes/dislikes in likedPosts/dislikePosts in DB
+  //save likes/dislikes in likedPosts/dislikePosts of user in DB
   saveReactions(reactionName: "dislikedPosts" | "likedPosts"): Observable<any> {
     if (reactionName === "likedPosts") {
       return this.getLikedPosts().pipe(
         switchMap((currentLikes: string[] | null | undefined) => {
           let updatedLikes = currentLikes ? [...currentLikes] : []; 
-          
           const storedLikes = this.cookieService.get('likedPosts');
           const newLikes = storedLikes ? JSON.parse(storedLikes) : [];
   
@@ -204,6 +203,7 @@ export class PostsService {
       );
     }
   }
+  // save post likes
   saveLikes(authorId: string, postId: string, likes: number) {
     if (likes && likes >= 0) {
       return this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { like: likes });
@@ -211,7 +211,7 @@ export class PostsService {
       return of({});
     }
   }
-  // Function to save dislikes
+  // save post dislikes
   saveDislikes(authorId: string, postId: string, dislikes: number) {
     if (dislikes && dislikes >= 0) {
       return this.http.patch(`${this.authService.getDatabaseURL()}/users/${authorId}/posts/${postId}.json`, { dislike: dislikes });
@@ -219,7 +219,7 @@ export class PostsService {
       return of({})
     }
   }
-
+  //check if current user is the post's author
   checkAuthor(authorId: string): boolean{
     if(authorId == this.cookieService.get('user')){
       return true;

@@ -103,12 +103,14 @@ export class PostComponent implements OnInit, AfterViewInit {
 
       if(likesSaved.includes(this.postId)){
         if(this.likeButton){
+          
           this.likeButton.style.color = "#FFABF3";
         }
         this.liked = true;
         this.changeDetector.detectChanges(); // Ensure view updates
       }
     });
+    //coloring dislike if it's disliked
     this.postsService.dislikesSaved$
     .subscribe((response: string[])=>{
       const dislikeSaved = response;
@@ -129,7 +131,7 @@ export class PostComponent implements OnInit, AfterViewInit {
         this.changeDetector.detectChanges();
       }
     })
-
+    //update comments number
     this.commentsService.updateComments$
     .subscribe((commentPostId: string)=>{
       if(commentPostId == this.postId){
@@ -156,7 +158,7 @@ export class PostComponent implements OnInit, AfterViewInit {
 
     this.postsService.saveLikes(this.authorId, this.postId, parseInt(savedLikes || "0", 10))
     .subscribe(()=>{
-      //get likes
+      //get likes number
       this.postsService.getLikes(this.authorId, this.postId).subscribe((response: any)=>{
         this.likes = Number(response);
         this.changeDetector.detectChanges();
@@ -170,7 +172,7 @@ export class PostComponent implements OnInit, AfterViewInit {
 
     this.postsService.saveDislikes(this.authorId, this.postId, parseInt(savedDislikes || "0", 10))
     .subscribe(()=>{
-      //get dilikes
+      //get dilikes number
       this.postsService.getDislikes(this.authorId, this.postId).subscribe((response: any)=>{
         this.dislikes = Number(response);
         this.changeDetector.detectChanges();
@@ -189,7 +191,6 @@ export class PostComponent implements OnInit, AfterViewInit {
             this.likeButton.style.color = "#FFABF3"; //change button style
             this.changeDetector.detectChanges();
             localStorage.setItem(`like-${this.postId}`, this.likes.toString());
-            console.log(this.likes);
             this.cookieService.set(`like-${this.postId}`, 'true'); //set cookie to keep track of status after refresh
             this.cookieService.set(`dislike-${this.postId}`, 'false');
             //if the post was in dislike status, remove dislike
@@ -210,7 +211,7 @@ export class PostComponent implements OnInit, AfterViewInit {
           this.cookieService.set(`like-${this.postId}`, 'false');
 
           this.liked = false; //set 'like' state to false
-          //change style if unliked
+          //change style to unliked
           this.likeButton.style.color = "#fff";
         }
       } else if (action === 'dislike') {
@@ -238,7 +239,7 @@ export class PostComponent implements OnInit, AfterViewInit {
           this.cookieService.set(`dislike-${this.postId}`, 'false');
           
           this.disliked = false;
-          //change style if undisliked
+          //change style to undisliked
           this.dislikeButton.style.color = "#fff";
         }
       }
@@ -270,6 +271,7 @@ export class PostComponent implements OnInit, AfterViewInit {
   comment() {
     if (this.logged) {
       this.canComment = true;
+      this.commentsService.openCommentsSection$.next([this.postId, this.authorId]);
     } else {
       this.canComment = false;
       setTimeout(() => {
@@ -277,6 +279,5 @@ export class PostComponent implements OnInit, AfterViewInit {
         this.changeDetector.detectChanges();
       }, 2000);
     }
-    this.commentsService.openCommentsSection$.next([this.postId, this.authorId]);
   }
 }

@@ -7,6 +7,7 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { ExploreComponent } from './components/explore/explore.component';
 import { CommentComponent } from './components/comment/comment.component';
+import { SearchComponent } from './components/search/search.component';
 
 export const routes: Routes = [
     {path: '', component: HomeComponent},
@@ -16,4 +17,5 @@ export const routes: Routes = [
     {path:'profile', component: ProfileComponent},
     {path:'explore', component: ExploreComponent},
     {path:'settings', component: SettingsComponent},
+    {path: 'search', component: SearchComponent}
 ];

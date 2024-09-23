@@ -12,7 +12,7 @@
             </button>
           </div>
           <mat-form-field appearance="fill">
-            <input matInput name="description" class="description" placeholder="Description" [(ngModel)]="description">
+            <input matInput name="description" class="description" placeholder="Description" (input)="updateCharCounter($event)" [(ngModel)]="description">
           </mat-form-field>
           <button mat-raised-button color="primary" type="submit" class="createBtn" color="accent">Create</button>
         </form>
@@ -34,6 +34,10 @@
             <p class="card-description">
             {{description}}
             </p>
+            <p class="char-counter">
+              {{char}}/{{maxChar}}
+            </p>
+            <mat-error *ngIf="isMaxChar">Maximum character limit reached!</mat-error>
         </mat-card-content>
         <mat-card-actions>
           <a><mat-icon>thumb_up</mat-icon></a>

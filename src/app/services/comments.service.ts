@@ -4,10 +4,7 @@ import { Comment } from '../models/comment';
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from './auth.service';
-import { CookieService } from 'ngx-cookie-service';
-import { error } from 'console';
 import { CommentComponent } from '../components/comment/comment.component';
-import { PostComponent } from '../components/post/post.component';
 
 @Injectable({
   providedIn: 'root'
@@ -20,8 +17,7 @@ export class CommentsService {
   commentRefs: ComponentRef<CommentComponent>[] = [];
 
   constructor(
-    private authService: AuthService,
-    private cookieService: CookieService
+    private authService: AuthService
   ) { }
 
   seeProfile(){
@@ -78,7 +74,9 @@ export class CommentsService {
     );
   }
   
-  
+  create(comment: Comment){
+    return this.http.post("http://localhost:4200/api/comments", comment);
+  }
   
 
 }

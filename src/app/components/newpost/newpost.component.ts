@@ -53,6 +53,9 @@ export class NewpostComponent implements OnInit,  AfterViewInit{
   accountImg_element!: HTMLElement;
   title: string = '';
   description: string = '';
+  char: number = 0;
+  maxChar: number = 250;
+  isMaxChar: boolean = false;
   date: Date = new Date();
   loadingDate: string = `${this.date.getDate()}/${this.date.getMonth() + 1}/${this.date.getFullYear()}`;
   
@@ -130,6 +133,21 @@ export class NewpostComponent implements OnInit,  AfterViewInit{
       this.router.navigate(['/']);
     }
   }
+  updateCharCounter(event: Event) {
+    const inputEl = event.target as HTMLInputElement;
+    const updatedValue = inputEl.value;
+
+    this.char = updatedValue.length;
+    this.isMaxChar = this.char >= this.maxChar;
+
+    if (this.isMaxChar) {
+      inputEl.value = updatedValue.slice(0, this.maxChar-1);
+    }
+
+    this.changeDetector.detectChanges();
+  }
+
+
 
   openSnackbar(){
     let seconds = 3;

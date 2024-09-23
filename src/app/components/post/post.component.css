@@ -34,6 +34,7 @@
 
 .like-btn, .dislike-btn, .comment-btn{
     margin-left: 20px;
+    margin-right: 5px;
     cursor: pointer;
 }
 .like-btn:hover, .dislike-btn:hover, .comment-btn:hover{
